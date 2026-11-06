@@ -14,6 +14,8 @@
 |---|---|
 | [pesquisa-referencias-2026-11.md](./pesquisa-referencias-2026-11.md) | 10 perfis de Instagram, 10 canais de YouTube e 10 perfis de TikTok, com os vídeos mais vistos e os padrões que se repetem |
 | [plano-conteudo-hienergy.md](./plano-conteudo-hienergy.md) | Pilares, ajustes no perfil, 10 roteiros de reels, 4 carrosséis e calendário de 4 semanas |
+| [pesquisa-raio-recarga-rifaina.md](./pesquisa-raio-recarga-rifaina.md) | Raio útil dos elétricos e probabilidade de parar em Rifaina por rota (SP ↔ MG) |
+| `modelo-raio-recarga.py` | Simulação usada no estudo (rodar com python3 + numpy) |
 | `chatgpt/` | Master prompt e passo a passo do projeto "HI Energy · Carrosséis" no ChatGPT |
 | `roteiros/` | Roteiros e carrosséis detalhados, um por arquivo, conforme forem produzidos |
 
