@@ -1,0 +1,16 @@
+cidade,uf,km_ate_rifaina,km_estimado,eletricos_puros_set2026,hibridos_set2026,frota_total_set2026,eletricos_puros_antes,eletricos_puros_depois,periodo_crescimento,fonte_crescimento,prob_turista_carregar_pct
+Rifaina,SP,0,nao,4,13,3497,1,3,out/2025-out/2026,Detran-SP (carros),
+Pedregulho,SP,26,nao,3,25,11881,0,2,out/2025-out/2026,Detran-SP (carros),0
+Cristais Paulista,SP,45,sim,6,22,6171,1,7,out/2025-out/2026,Detran-SP (carros),0
+Franca,SP,70,nao,521,1287,320167,167,502,out/2025-out/2026,Detran-SP (carros),0
+Batatais,SP,115,sim,48,138,50973,17,37,out/2025-out/2026,Detran-SP (carros),68
+Ribeirao Preto,SP,160,sim,2416,5679,631043,1024,2246,out/2025-out/2026,Detran-SP (carros),94
+Igarapava,SP,48,sim,2,26,18823,0,2,out/2025-out/2026,Detran-SP (carros),0
+Sacramento,MG,35,nao,9,31,20594,6,9,dez/2025-set/2026,Senatran,0
+Araxa,MG,103,nao,141,225,86959,58,141,dez/2025-set/2026,Senatran,54
+Perdizes,MG,115,sim,2,14,11693,3,2,dez/2025-set/2026,Senatran,68
+Ibia,MG,165,sim,8,23,15618,4,8,dez/2025-set/2026,Senatran,96
+Patrocinio,MG,208,sim,51,95,80878,30,51,dez/2025-set/2026,Senatran,100
+Patos de Minas,MG,265,sim,90,303,136841,38,90,dez/2025-set/2026,Senatran,100
+Uberaba,MG,100,sim,437,965,272035,219,437,dez/2025-set/2026,Senatran,51
+Uberlandia,MG,205,sim,2547,3501,569041,1369,2547,dez/2025-set/2026,Senatran,100

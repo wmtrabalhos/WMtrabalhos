@@ -1,0 +1,698 @@
+<title>HI Energy · Cofre de Pesquisa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: cofre estilo Obsidian. Faixa de ícones | explorador de notas | nota aberta | grafo local e links. Identidade HI Energy, tema escuro fixo. */
+:root{
+  --bg:#050B1A; --panel:#0A1428; --panel2:#0C1730; --line:#1E2B47; --line2:#2A3A5C;
+  --fg:#E8F1EC; --soft:#B7C3CE; --muted:#8A97AB; --accent:#A9CF4A; --accent-ink:#0B1404;
+  --river:#4F8CC0; --warn:#E3A44A; --sp:#A9CF4A; --mg:#7FB2E5; --other:#C7A4F0;
+  --display:'Montserrat',Arial,sans-serif; --body:'Inter',Arial,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:50;background:var(--panel)}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:52px 270px minmax(0,1fr) 320px;height:100%;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+/* ribbon */
+.ribbon{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding-block:12px}
+.logo{width:34px;height:34px;margin-bottom:10px}
+.rbtn{width:36px;height:36px;border-radius:8px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.rbtn:hover,.rbtn[aria-pressed="true"]{background:var(--panel2);color:var(--accent)}
+.rbtn svg{width:19px;height:19px}
+/* sidebar */
+.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
+.side-head{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+.vault-name{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.vault-name small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
+.search{margin-top:10px;width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--fg);font-size:13px}
+.search::placeholder{color:var(--muted)}
+.tree{overflow:auto;padding:8px 6px 24px;flex:1}
+.folder>button{width:100%;display:flex;align-items:center;gap:6px;background:none;border:0;padding:5px 8px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;color:var(--soft);text-align:left}
+.folder>button:hover{background:var(--panel2)}
+.folder>button .chev{transition:transform .15s;width:10px;color:var(--muted)}
+.folder.closed>button .chev{transform:rotate(-90deg)}
+.folder.closed .files{display:none}
+.files{padding-left:14px;border-left:1px solid var(--line);margin-left:13px}
+.file{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 8px;border-radius:5px;cursor:pointer;font-size:13px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file:hover{background:var(--panel2);color:var(--fg)}
+.file.active{background:rgba(169,207,74,.14);color:var(--accent)}
+.file mark{background:rgba(169,207,74,.35);color:var(--fg);border-radius:2px}
+.side-foot{border-top:1px solid var(--line);padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.tabs{display:flex;align-items:flex-end;gap:2px;background:var(--panel);border-bottom:1px solid var(--line);padding:6px 8px 0;overflow-x:auto;min-height:40px;padding-top:max(6px,env(safe-area-inset-top,0px))}
+.tab{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid transparent;border-bottom:0;border-radius:7px 7px 0 0;padding:6px 10px;font-size:12.5px;color:var(--muted);cursor:pointer;white-space:nowrap;max-width:200px}
+.tab span{overflow:hidden;text-overflow:ellipsis}
+.tab.active{background:var(--bg);border-color:var(--line);color:var(--fg)}
+.tab .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 2px;font-size:14px;line-height:1}
+.tab .x:hover{color:var(--fg)}
+.mobile-bar{display:none}
+.scroll{overflow:auto;flex:1}
+.note{max-width:860px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+.crumb{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.crumb b{color:var(--soft);font-weight:400}
+.note h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,3.4vw,36px);line-height:1.15;margin:10px 0 14px;text-wrap:balance}
+.note h2{font-family:var(--display);font-weight:700;font-size:20px;margin:30px 0 10px;text-wrap:balance}
+.note h3{font-family:var(--display);font-weight:700;font-size:16px;margin:22px 0 8px}
+.note p,.note li{color:var(--soft)}
+.note p{margin:0 0 12px;max-width:68ch}
+.note ul,.note ol{margin:0 0 14px;padding-left:22px}
+.note li{margin:4px 0}
+.note strong{color:var(--fg)}
+.wl{color:var(--accent);text-decoration:none;cursor:pointer;border-bottom:1px solid rgba(169,207,74,.35)}
+.wl:hover{border-bottom-color:var(--accent);background:rgba(169,207,74,.08)}
+.ext{color:#9CC6EE;text-decoration:none;border-bottom:1px dotted rgba(156,198,238,.5)}
+.ext:hover{border-bottom-style:solid}
+.tag{display:inline-block;font-family:var(--mono);font-size:11.5px;color:var(--accent);background:rgba(169,207,74,.1);border:1px solid rgba(169,207,74,.25);border-radius:999px;padding:1px 9px;margin:0 4px 4px 0;cursor:pointer}
+.props{border:1px solid var(--line);border-radius:8px;margin:6px 0 20px;overflow:hidden}
+.props div{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:7px 12px;border-top:1px solid var(--line);font-size:13px}
+.props div:first-child{border-top:0}
+.props dt{font-family:var(--mono);color:var(--muted);font-size:12px}
+.props dd{margin:0;color:var(--fg);min-width:0}
+.callout{border:1px solid var(--line2);border-left:3px solid var(--accent);background:var(--panel);border-radius:6px;padding:12px 14px;margin:14px 0}
+.callout.warn{border-left-color:var(--warn)}
+.callout.info{border-left-color:var(--mg)}
+.callout .ct{font-family:var(--display);font-weight:700;font-size:13px;margin-bottom:4px;color:var(--fg)}
+.callout p:last-child{margin-bottom:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 20px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.stat .n{font-family:var(--display);font-weight:800;font-size:26px;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:12.5px;color:var(--soft);margin-top:4px}
+.tbl{overflow-x:auto;margin:10px 0 18px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+thead th{border-top:0;background:var(--panel);font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--muted);cursor:pointer;user-select:none}
+thead th[data-sort]:hover{color:var(--fg)}
+td.r,th.r{text-align:right}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+.uf{font-family:var(--mono);font-size:11px;border-radius:4px;padding:1px 5px}
+.uf.SP{color:var(--sp);background:rgba(169,207,74,.12)}
+.uf.MG{color:var(--mg);background:rgba(127,178,229,.12)}
+.bars{display:flex;flex-direction:column;gap:7px;margin:12px 0 18px}
+.bar{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13px}
+.bar .lbl{color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .trk{height:16px;background:var(--panel);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar .fill.mg{background:var(--mg)}
+.bar .fill.mute{background:var(--line2)}
+.bar .v{font-family:var(--mono);font-size:12px;text-align:right;color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+.chip{border:1px solid var(--line2);background:var(--panel);color:var(--soft);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer}
+.chip[aria-pressed="true"]{background:rgba(169,207,74,.15);border-color:rgba(169,207,74,.5);color:var(--accent)}
+.mapwrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0 14px}
+.mapwrap svg{display:block;width:100%;height:auto;max-height:78vh}
+.mapwrap .city{cursor:pointer}
+.mapwrap .city:hover circle.dot,.mapwrap .city:focus circle.dot{stroke:var(--fg);stroke-width:3}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:4px 2px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.card h3{margin:0 0 6px}
+.card p{margin:0 0 6px;font-size:13.5px}
+.src{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.big-graph{background:var(--panel);border:1px solid var(--line);border-radius:10px;height:70vh;min-height:420px;position:relative;overflow:hidden}
+.big-graph canvas{width:100%;height:100%;display:block}
+/* right pane */
+.right{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:auto}
+.rsec{border-bottom:1px solid var(--line);padding:12px 14px}
+.rsec h4{margin:0 0 8px;font-family:var(--mono);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);display:flex;justify-content:space-between}
+.local{height:240px;background:var(--bg);border:1px solid var(--line);border-radius:8px;position:relative}
+.local canvas{width:100%;height:100%;display:block}
+.linklist{display:flex;flex-direction:column;gap:2px}
+.linklist button{text-align:left;background:none;border:0;padding:4px 6px;border-radius:5px;font-size:13px;color:var(--soft);cursor:pointer}
+.linklist button:hover{background:var(--panel2);color:var(--accent)}
+.empty{font-size:12.5px;color:var(--muted)}
+.outline a{display:block;font-size:12.5px;color:var(--soft);text-decoration:none;padding:3px 6px;border-radius:4px}
+.outline a:hover{background:var(--panel2);color:var(--fg)}
+.scrim{display:none}
+@media (max-width:1180px){.app{grid-template-columns:52px 250px minmax(0,1fr)}.right{display:none}.note .right-inline{display:block}}
+@media (min-width:1181px){.right-inline{display:none}}
+@media (max-width:760px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .ribbon{display:none}
+  .side{position:fixed;inset:0 auto 0 0;width:min(86vw,320px);z-index:40;transform:translateX(-100%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px)}
+  .app.drawer .side{transform:none}
+  .app.drawer .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30}
+  .mobile-bar{display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:max(8px,env(safe-area-inset-top,0px))}
+  .mobile-bar button{border:1px solid var(--line2);background:var(--bg);border-radius:6px;padding:6px 10px;font-size:13px}
+  .mobile-bar b{font-family:var(--display);font-size:14px}
+  .tabs{display:none}
+  .bar{grid-template-columns:96px minmax(0,1fr) 54px}
+  .props div{grid-template-columns:110px 1fr}
+}
+.right-inline{border-top:1px solid var(--line);margin-top:36px;padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="app" id="app">
+  <nav class="ribbon" aria-label="Atalhos">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#0C1730"/><path d="M14 46 L28 18 L36 18 L22 46 Z" fill="#E8F1EC"/><path d="M26 46 L34 34 L44 34 L36 46 Z" fill="#E8F1EC"/><path d="M40 26 L44 18 L54 18 L50 26 Z" fill="#A9CF4A"/></svg>
+    <button class="rbtn" data-go="inicio" title="Início" aria-label="Início"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button class="rbtn" data-go="mapa-do-corredor" title="Mapa" aria-label="Mapa interativo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></button>
+    <button class="rbtn" data-go="grafo" title="Grafo" aria-label="Grafo de notas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7l10 0.5M6.5 8l4.5 8M17.5 9l-4.5 7"/></svg></button>
+    <button class="rbtn" data-go="frota-por-cidade" title="Frota" aria-label="Frota elétrica por cidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></button>
+    <button class="rbtn" data-go="comprador-perfil" title="Comprador" aria-label="Perfil do comprador"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></button>
+    <button class="rbtn" data-go="fontes" title="Fontes" aria-label="Fontes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h12l4 4v12H4z"/><path d="M8 12h8M8 16h8M8 8h4"/></svg></button>
+  </nav>
+
+  <aside class="side" id="side" aria-label="Explorador de notas">
+    <div class="side-head">
+      <div class="vault-name">HI Energy <small>cofre · nov/2026</small></div>
+      <input class="search" id="q" type="search" placeholder="Buscar notas, cidades, tags…" aria-label="Buscar notas">
+    </div>
+    <div class="tree" id="tree"></div>
+    <div class="side-foot" id="count"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <main class="main">
+    <div class="mobile-bar"><button id="menu" aria-label="Abrir notas">☰ Notas</button><b id="mtitle">HI Energy</b></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="scroll" id="scroll"><article class="note" id="note"></article></div>
+  </main>
+
+  <aside class="right" aria-label="Grafo local e links">
+    <div class="rsec"><h4>Grafo local <span id="lcount"></span></h4><div class="local"><canvas id="lg"></canvas></div></div>
+    <div class="rsec"><h4>Links de saída</h4><div class="linklist" id="out"></div></div>
+    <div class="rsec"><h4>Backlinks</h4><div class="linklist" id="back"></div></div>
+    <div class="rsec"><h4>Nesta nota</h4><div class="outline" id="outline"></div></div>
+  </aside>
+</div>
+
+<script>
+/* ============ DADOS ============ */
+// Frota: Senatran set/2026 (todos os tipos de veículo, por município e combustível). BEV = ELETRICO, ELETRICO/FONTE EXTERNA, ELETRICO/FONTE INTERNA. Híbridos = combustíveis com /ELETRICO.
+// Crescimento SP: Detran-SP frota ativa, automóveis/camionetas/utilitários, out/2025 → out/2026. Crescimento MG: Senatran dez/2025 → set/2026.
+const CITIES=[
+ {id:'rifaina',n:'Rifaina',uf:'SP',lat:-20.080,lon:-47.420,km:0,bev:4,hib:13,frota:3497,b0:1,b1:3,gp:'out/25→out/26 (carros)',pib:null,ida:null,papel:'Base da HI Energy',grp:'base'},
+ {id:'pedregulho',n:'Pedregulho',uf:'SP',lat:-20.257,lon:-47.477,km:26,bev:3,hib:25,frota:11881,b0:0,b1:2,gp:'out/25→out/26 (carros)',pib:null,ida:0,papel:'Vizinho · conveniência',grp:'local'},
+ {id:'cristais-paulista',n:'Cristais Paulista',uf:'SP',lat:-20.404,lon:-47.421,km:45,est:true,bev:6,hib:22,frota:6171,b0:1,b1:7,gp:'out/25→out/26 (carros)',pib:null,ida:0,papel:'Vizinho · conveniência',grp:'local'},
+ {id:'franca',n:'Franca',uf:'SP',lat:-20.539,lon:-47.401,km:70,bev:521,hib:1287,frota:320167,b0:167,b1:502,gp:'out/25→out/26 (carros)',pib:null,ida:0,papel:'Vizinho grande · decide o corredor',grp:'local'},
+ {id:'batatais',n:'Batatais',uf:'SP',lat:-20.891,lon:-47.585,km:115,est:true,bev:48,hib:138,frota:50973,b0:17,b1:37,gp:'out/25→out/26 (carros)',pib:null,ida:68,papel:'Turista + corredor',grp:'turista'},
+ {id:'ribeirao-preto',n:'Ribeirão Preto',uf:'SP',lat:-21.177,lon:-47.810,km:160,est:true,bev:2416,hib:5679,frota:631043,b0:1024,b1:2246,gp:'out/25→out/26 (carros)',pib:74869,ida:94,papel:'Maior mercado · turista + corredor',grp:'turista'},
+ {id:'igarapava',n:'Igarapava',uf:'SP',lat:-20.038,lon:-47.747,km:48,est:true,bev:2,hib:26,frota:18823,b0:0,b1:2,gp:'out/25→out/26 (carros)',pib:null,ida:0,papel:'Fora da rota (Anhanguera)',grp:'fora'},
+ {id:'sacramento',n:'Sacramento',uf:'MG',lat:-19.865,lon:-47.440,km:35,bev:9,hib:31,frota:20594,b0:6,b1:9,gp:'dez/25→set/26',pib:null,ida:0,papel:'Vizinho mineiro · conveniência',grp:'local'},
+ {id:'araxa',n:'Araxá',uf:'MG',lat:-19.593,lon:-46.941,km:103,bev:141,hib:225,frota:86959,b0:58,b1:141,gp:'dez/25→set/26',pib:79212,ida:54,papel:'Polo mineiro do corredor',grp:'corredor'},
+ {id:'perdizes',n:'Perdizes',uf:'MG',lat:-19.343,lon:-47.293,km:115,est:true,bev:2,hib:14,frota:11693,b0:3,b1:2,gp:'dez/25→set/26',pib:null,ida:68,papel:'Turista ocasional',grp:'turista'},
+ {id:'ibia',n:'Ibiá',uf:'MG',lat:-19.478,lon:-46.539,km:165,est:true,bev:8,hib:23,frota:15618,b0:4,b1:8,gp:'dez/25→set/26',pib:null,ida:96,papel:'Corredor (Alto Paranaíba)',grp:'corredor'},
+ {id:'patrocinio',n:'Patrocínio',uf:'MG',lat:-18.944,lon:-46.993,km:208,est:true,bev:51,hib:95,frota:80878,b0:30,b1:51,gp:'dez/25→set/26',pib:null,ida:100,papel:'Corredor (Alto Paranaíba)',grp:'corredor'},
+ {id:'patos-de-minas',n:'Patos de Minas',uf:'MG',lat:-18.579,lon:-46.518,km:265,est:true,bev:90,hib:303,frota:136841,b0:38,b1:90,gp:'dez/25→set/26',pib:51191,ida:100,papel:'Corredor longo (para em Araxá antes)',grp:'corredor'},
+ {id:'uberaba',n:'Uberaba',uf:'MG',lat:-19.747,lon:-47.932,km:100,est:true,bev:437,hib:965,frota:272035,b0:219,b1:437,gp:'dez/25→set/26',pib:70121,ida:51,papel:'Turista (não passa no corredor)',grp:'turista'},
+ {id:'uberlandia',n:'Uberlândia',uf:'MG',lat:-18.918,lon:-48.277,km:205,est:true,bev:2547,hib:3501,frota:569041,b0:1369,b1:2547,gp:'dez/25→set/26',pib:71598,ida:100,papel:'Turista potencial (fora do corredor)',grp:'turista'}
+];
+const CHARGERS={'ribeirao-preto':'rápido','araxa':'rápido','uberaba':'rápido','uberlandia':'rápido','franca':'a confirmar'};
+const fmt=n=>n==null?'—':n.toLocaleString('pt-BR');
+const pct=(a,b)=>b?Math.round(100*(b-a)/a):null;
+const growth=c=>c.b0>=10?('+'+pct(c.b0,c.b1)+'%'):(c.b0+' → '+c.b1);
+const C=Object.fromEntries(CITIES.map(c=>[c.id,c]));
+
+/* ============ NOTAS ============ */
+const L=(id,t)=>`[[${id}|${t}]]`;
+const X=(u,t)=>`<a class="ext" href="${u}" target="_blank" rel="noopener">${t}</a>`;
+const NOTES=[];
+const add=(o)=>NOTES.push(o);
+
+add({id:'inicio',folder:'00 Painel',title:'Painel do cofre',tags:['painel'],props:{Projeto:'HI Energy · @hienergy.rifaina',Atualizado:'06/11/2026',Responsável:'Wallace'},body:()=>`
+<p>Este cofre reúne a pesquisa de mercado da HI Energy, o eletroposto com Market em Rifaina/SP. Cada nota abre um ponto da pesquisa e os links ligam as ideias, como no Obsidian. Use o explorador à esquerda, a busca ou o grafo.</p>
+<div class="stats">
+ <div class="stat"><div class="n">${fmt(CITIES.filter(c=>c.grp!=='fora').reduce((s,c)=>s+c.bev,0))}</div><div class="l">elétricos puros nas 14 cidades da área de influência</div></div>
+ <div class="stat"><div class="n">+201%</div><div class="l">crescimento dos elétricos em Franca em 12 meses</div></div>
+ <div class="stat"><div class="n">94%</div><div class="l">dos turistas de Ribeirão precisam carregar para voltar</div></div>
+ <div class="stat"><div class="n">~40%</div><div class="l">dos elétricos da região são BYD Dolphin Mini</div></div>
+</div>
+<h2>Por onde começar</h2>
+<div class="grid2">
+ <div class="card"><h3>${L('mapa-do-corredor','Mapa interativo')}</h3><p>Cidades, rota, anéis de raio útil e bolhas de frota. Clique numa cidade para abrir a ficha.</p></div>
+ <div class="card"><h3>${L('frota-por-cidade','Frota elétrica por cidade')}</h3><p>Quantos elétricos e híbridos há em cada cidade pesquisada, com dados oficiais.</p></div>
+ <div class="card"><h3>${L('comprador-perfil','Quem compra elétrico')}</h3><p>Renda, idade, motivos, medos, canais e lugares que o comprador frequenta.</p></div>
+ <div class="card"><h3>${L('estrategia-hi-energy','Estratégia')}</h3><p>O que a pesquisa muda no Instagram e na operação do posto.</p></div>
+</div>
+<h2>Mapa do cofre</h2>
+<ul>
+<li><strong>Território:</strong> ${L('mapa-do-corredor','Mapa')} · ${L('corredor-sp334','Corredor SP-334 / MG-428')} · ${L('raio-de-recarga','Raio de recarga')} · ${L('demanda-por-rota','Demanda por rota')}</li>
+<li><strong>Frota:</strong> ${L('frota-por-cidade','Frota por cidade')} · ${L('crescimento-da-frota','Crescimento')} · ${L('modelos-na-regiao','Modelos na região')}</li>
+<li><strong>Cidades:</strong> ${CITIES.map(c=>L('cidade-'+c.id,c.n)).join(' · ')}</li>
+<li><strong>Comprador:</strong> ${L('comprador-perfil','Perfil e renda')} · ${L('comprador-motivos','Motivos e medos')} · ${L('comprador-canais','Canais e redes')} · ${L('comprador-lugares','Lugares e hábitos')} · ${L('personas','Personas')}</li>
+<li><strong>Ação:</strong> ${L('estrategia-hi-energy','Estratégia')} · ${L('validar','O que validar')} · ${L('metodologia','Metodologia')} · ${L('fontes','Fontes')}</li>
+</ul>`});
+
+add({id:'grafo',folder:'00 Painel',title:'Grafo de notas',tags:['painel'],props:{Dica:'Clique num nó para abrir a nota. Arraste para mover.'},body:()=>`
+<p>Cada ponto é uma nota do cofre. As linhas são os links entre elas. Passe o mouse para ver os nomes e os vizinhos. As cores seguem as pastas: ${['Território','Frota','Cidades','Comprador','Estratégia'].join(', ')}.</p>
+<div class="big-graph"><canvas id="bg"></canvas></div>
+<div class="legend" id="glegend"></div>`});
+
+/* ---- Território ---- */
+add({id:'mapa-do-corredor',folder:'01 Território',title:'Mapa interativo do corredor',tags:['mapa','território'],props:{Escala:'Aproximada, a partir das coordenadas reais',Fonte:'Coordenadas IBGE · frota Senatran set/2026'},body:()=>`
+<p>Rifaina fica na divisa, às margens do Rio Grande, no fim da SP-334. Ligue e desligue as camadas e clique numa cidade para abrir a ficha dela.</p>
+<div class="chips" id="layers">
+ <button class="chip" data-layer="rings" aria-pressed="true">Anéis de raio útil</button>
+ <button class="chip" data-layer="bubbles" aria-pressed="true">Bolhas de frota elétrica</button>
+ <button class="chip" data-layer="route" aria-pressed="true">Rotas</button>
+ <button class="chip" data-layer="chargers" aria-pressed="true">Carregadores rápidos</button>
+ <button class="chip" data-layer="labels" aria-pressed="true">Nomes</button>
+</div>
+<div class="mapwrap" id="mapbox"></div>
+<div class="legend">
+ <span><i style="background:var(--sp)"></i>Cidade de SP</span><span><i style="background:var(--mg)"></i>Cidade de MG</span>
+ <span><i style="background:transparent;border:2px dashed var(--accent)"></i>Raio de ida e volta sem recarregar (compacto, médio, longo)</span>
+ <span><i style="background:rgba(169,207,74,.25)"></i>Bolha = elétricos puros na cidade</span>
+ <span><i style="background:var(--warn)"></i>Carregador rápido · contorno = a confirmar</span>
+</div>
+<div class="callout"><div class="ct">Como ler</div><p>Os anéis mostram até onde cada tipo de carro vai e volta de Rifaina sem recarregar. Quem mora fora do anel do próprio carro precisa carregar aqui para voltar. Detalhes em ${L('raio-de-recarga','Raio de recarga')}.</p></div>`});
+
+add({id:'corredor-sp334',folder:'01 Território',title:'Corredor SP-334 / MG-428',tags:['território','rota'],props:{Trajeto:'Ribeirão → Batatais → Franca → Cristais → Pedregulho → Rifaina → Sacramento → Araxá',Vazio:'~173 km entre Franca e Araxá sem carregador rápido confirmado'},body:()=>`
+<p>A SP-334 (Rodovia Cândido Portinari) termina em Rifaina, na divisa com Minas. Do outro lado do Rio Grande, a MG-428 segue para Sacramento e Araxá, e dali para o Alto Paranaíba (${L('cidade-ibia','Ibiá')}, ${L('cidade-patrocinio','Patrocínio')}, ${L('cidade-patos-de-minas','Patos de Minas')}).</p>
+<h2>Quem passa e quem não passa</h2>
+<div class="grid2">
+ <div class="card"><h3>Passa por Rifaina</h3><p>${L('cidade-ribeirao-preto','Ribeirão')}, ${L('cidade-batatais','Batatais')}, ${L('cidade-franca','Franca')} e ${L('cidade-pedregulho','Pedregulho')} ↔ ${L('cidade-sacramento','Sacramento')}, ${L('cidade-araxa','Araxá')} e o Alto Paranaíba. Também Campinas e São Paulo ↔ Araxá.</p></div>
+ <div class="card"><h3>Não passa</h3><p>${L('cidade-uberaba','Uberaba')} e ${L('cidade-uberlandia','Uberlândia')} → Ribeirão vão pela Anhanguera, por ${L('cidade-igarapava','Igarapava')}. Belo Horizonte → Ribeirão vai por Passos. Esses entram como <strong>turistas</strong>, não como viajantes do corredor.</p></div>
+</div>
+<h2>O vale</h2>
+<p>Rifaina fica a cerca de 570 m de altitude, no vale do Rio Grande. Franca e Araxá ficam perto de 1.000 m. Todo carro sai de Rifaina subindo, e isso gasta mais bateria do que a mesma distância no plano.</p>
+<div class="callout warn"><div class="ct">Ponto que decide o jogo</div><p>Se ${L('cidade-franca','Franca')} tiver carregador rápido, a parada obrigatória no eixo Ribeirão–Araxá cai de cerca de 83% para 25% dos elétricos. Ver ${L('validar','O que validar')}.</p></div>`});
+
+add({id:'raio-de-recarga',folder:'01 Território',title:'Raio de recarga dos elétricos',tags:['território','autonomia'],props:{Premissa:'Estrada a 100–110 km/h, ar ligado, chega com 15% de reserva',Frota:'Pesos confirmados pelos modelos emplacados na região'},body:()=>`
+<div class="tbl"><table><thead><tr><th>Tipo</th><th>Exemplos</th><th class="r">Roda na estrada</th><th class="r">Vai e volta sem carregar até</th><th class="r">Peso na região</th></tr></thead><tbody>
+<tr><td>Compacto</td><td>Dolphin Mini, Kwid E-Tech</td><td class="r">150–210 km</td><td class="r">70–100 km</td><td class="r">~45%</td></tr>
+<tr><td>Médio</td><td>Dolphin, Ora 03, Geely EX2</td><td class="r">200–260 km</td><td class="r">95–125 km</td><td class="r">~35%</td></tr>
+<tr><td>Longo</td><td>Seal, Yuan Plus, EX30</td><td class="r">260–360 km</td><td class="r">125–175 km</td><td class="r">~20%</td></tr>
+</tbody></table></div>
+<p>O peso de cada tipo foi conferido com os dados reais: na região de Ribeirão e Franca, o Dolphin Mini sozinho é cerca de 40% dos elétricos puros (${L('modelos-na-regiao','Modelos na região')}).</p>
+<p>Aplicação por cidade em ${L('demanda-por-rota','Demanda por rota')}.</p>`});
+
+add({id:'demanda-por-rota',folder:'01 Território',title:'Demanda por rota',tags:['território','probabilidade'],props:{Método:'Simulação de 200 mil carros (ver Metodologia)'},body:()=>`
+<h2>Turista: ida e volta até Rifaina</h2>
+<p>Porcentagem dos elétricos que precisam carregar em Rifaina para voltar para casa.</p>
+<div class="bars">${CITIES.filter(c=>c.ida!=null).sort((a,b)=>b.ida-a.ida).map(c=>`<div class="bar"><span class="lbl">${L('cidade-'+c.id,c.n)}</span><span class="trk"><span class="fill ${c.ida?'':'mute'}" style="width:${Math.max(c.ida,1)}%;display:block"></span></span><span class="v">${c.ida}%</span></div>`).join('')}</div>
+<h2>Viajante: passando por Rifaina</h2>
+<div class="tbl"><table><thead><tr><th>Viagem</th><th class="r">Total</th><th class="r">Precisa parar</th><th class="r">Rifaina resolve</th></tr></thead><tbody>
+<tr><td>Ribeirão Preto → Araxá</td><td class="r">~273 km</td><td class="r">83%</td><td class="r">75%</td></tr>
+<tr><td>Araxá → Ribeirão Preto</td><td class="r">~273 km</td><td class="r">83%</td><td class="r">60%</td></tr>
+<tr><td>Ribeirão Preto → Ibiá</td><td class="r">~335 km</td><td class="r">95%</td><td class="r">68%</td></tr>
+<tr><td>Batatais → Araxá</td><td class="r">~228 km</td><td class="r">61%</td><td class="r">61%</td></tr>
+<tr><td>Ribeirão Preto → Sacramento</td><td class="r">~205 km</td><td class="r">44%</td><td class="r">37%</td></tr>
+<tr><td>Franca → Araxá</td><td class="r">~183 km</td><td class="r">25%</td><td class="r">25%</td></tr>
+<tr><td>Patrocínio → Ribeirão/Franca</td><td class="r">288–378 km</td><td class="r">86–100%</td><td class="r">37–52%</td></tr>
+</tbody></table></div>`});
+
+/* ---- Frota ---- */
+const inflSum=(f)=>CITIES.filter(c=>c.grp!=='fora').reduce((s,c)=>s+f(c),0);
+add({id:'frota-por-cidade',folder:'02 Frota elétrica',title:'Frota elétrica por cidade',tags:['frota','dados'],props:{Fonte:'Senatran, frota por município e combustível, set/2026',Inclui:'Todos os tipos de veículo registrados',Conferência:'Detran-SP out/2026 (só carros) bate com a Senatran'},body:()=>`
+<div class="stats">
+ <div class="stat"><div class="n">${fmt(inflSum(c=>c.bev))}</div><div class="l">elétricos puros nas cidades da área de influência</div></div>
+ <div class="stat"><div class="n">${fmt(inflSum(c=>c.hib))}</div><div class="l">híbridos (podem carregar, mas não precisam)</div></div>
+ <div class="stat"><div class="n">${fmt(484407)}</div><div class="l">elétricos puros no Brasil (Senatran, set/2026)</div></div>
+</div>
+<p>Clique no cabeçalho para ordenar. Clique na cidade para abrir a ficha.</p>
+<div class="tbl"><table id="ftable"><thead><tr><th data-sort="n">Cidade</th><th data-sort="uf">UF</th><th class="r" data-sort="km">km até Rifaina</th><th class="r" data-sort="bev">Elétricos puros</th><th class="r" data-sort="hib">Híbridos</th><th class="r" data-sort="share">% eletrificada</th><th class="r" data-sort="g">Crescimento</th><th class="r" data-sort="ida">Precisa carregar (turista)</th></tr></thead><tbody></tbody></table></div>
+<div class="callout info"><div class="ct">Leitura</div><p>${L('cidade-ribeirao-preto','Ribeirão Preto')} sozinha tem mais de 2,4 mil elétricos puros e 5,7 mil híbridos. ${L('cidade-uberlandia','Uberlândia')} tem números parecidos, mas fica fora do corredor. Rifaina tem só 4. O cliente vem de fora.</p></div>
+<p>Evolução em ${L('crescimento-da-frota','Crescimento da frota')}. Modelos em ${L('modelos-na-regiao','Modelos na região')}.</p>`});
+
+add({id:'crescimento-da-frota',folder:'02 Frota elétrica',title:'Crescimento da frota elétrica',tags:['frota','dados'],props:{SP:'Detran-SP frota ativa, carros, out/2025 → out/2026',MG:'Senatran, todos os veículos, dez/2025 → set/2026',Brasil:'288.492 → 484.407 elétricos puros (dez/25 → set/26, +68%)'},body:()=>`
+<p>Elétricos puros, cidades com base de pelo menos 10 veículos.</p>
+<div class="bars">${CITIES.filter(c=>c.b0>=10).sort((a,b)=>pct(b.b0,b.b1)-pct(a.b0,a.b1)).map(c=>{const g=pct(c.b0,c.b1);return `<div class="bar"><span class="lbl">${L('cidade-'+c.id,c.n)}</span><span class="trk"><span class="fill ${c.uf==='MG'?'mg':''}" style="width:${Math.min(100,g/2.2)}%;display:block"></span></span><span class="v">+${g}%</span></div>`}).join('')}</div>
+<div class="tbl"><table><thead><tr><th>Cidade</th><th>Período</th><th class="r">Antes</th><th class="r">Depois</th></tr></thead><tbody>${CITIES.map(c=>`<tr><td>${L('cidade-'+c.id,c.n)}</td><td>${c.gp}</td><td class="r">${fmt(c.b0)}</td><td class="r">${fmt(c.b1)}</td></tr>`).join('')}</tbody></table></div>
+<div class="callout"><div class="ct">O que isso significa</div><p>Os elétricos de Franca triplicaram em um ano, e os de Araxá e Patos de Minas mais que dobraram em nove meses. A demanda no corredor cresce mais rápido que a média do estado de SP (+99%).</p></div>`});
+
+add({id:'modelos-na-regiao',folder:'02 Frota elétrica',title:'Modelos na região',tags:['frota','dados','modelos'],props:{Recorte:'Ribeirão, Franca, Batatais, Pedregulho, Rifaina, Igarapava, Ituverava, Cristais',Fonte:'Detran-SP frota ativa, out/2026, carros',Total:'2.816 elétricos puros'},body:()=>{
+ const m=[['BYD Dolphin Mini (todas as versões)',1125],['BYD Dolphin / Dolphin Plus',500],['Geely EX2',280],['BYD Seal',80],['GWM Ora 03',77],['GAC Aion UT',63],['BYD Yuan Plus / Yuan Pro',56]];
+ const h=[['BYD Song Plus (híbrido plug-in)',714],['Toyota Corolla Cross (híbrido)',613],['BYD Song Pro (híbrido plug-in)',420],['Toyota Corolla (híbrido)',345],['Caoa Chery Tiggo 8 PHEV',218]];
+ const bar=(a,t,cl)=>a.map(([k,v])=>`<div class="bar"><span class="lbl" title="${k}">${k}</span><span class="trk"><span class="fill ${cl}" style="width:${100*v/t}%;display:block"></span></span><span class="v">${fmt(v)}</span></div>`).join('');
+ return `<h2>Elétricos puros mais comuns</h2><div class="bars">${bar(m,1125,'')}</div>
+<p>O <strong>Dolphin Mini</strong> é cerca de 40% dos elétricos puros da região, e o Dolphin, mais 18%. É o cliente-chave do ${L('raio-de-recarga','raio curto')}.</p>
+<h2>Híbridos mais comuns</h2><div class="bars">${bar(h,714,'mg')}</div>
+<p>Os híbridos plug-in (Song Plus, Song Pro, Tiggo 8) podem carregar na tomada. Não precisam, mas aproveitam uma recarga barata durante a pausa.</p>
+<h2>Quem é o dono</h2>
+<div class="stats"><div class="stat"><div class="n">84%</div><div class="l">pessoa física</div></div><div class="stat"><div class="n">16%</div><div class="l">pessoa jurídica (empresas, frotas, locadoras)</div></div></div>`}});
+
+/* ---- Cidades ---- */
+CITIES.forEach(c=>{
+ const share=(100*(c.bev+c.hib)/c.frota).toFixed(2).replace('.',',');
+ const ch=CHARGERS[c.id];
+ add({id:'cidade-'+c.id,folder:'03 Cidades',title:c.n+' ('+c.uf+')',tags:['cidade',c.uf.toLowerCase(),c.grp],city:c.id,props:{Papel:c.papel,'km até Rifaina':c.km?(c.est?'~':'')+c.km+' km'+(c.est?' (estimado)':''):'—',Carregador:ch?('rápido '+(ch==='rápido'?'confirmado':'a confirmar')):'nenhum rápido mapeado','PIB per capita':c.pib?'R$ '+fmt(c.pib)+' (IBGE 2023)':'—'},body:()=>`
+<div class="stats">
+ <div class="stat"><div class="n">${fmt(c.bev)}</div><div class="l">elétricos puros</div></div>
+ <div class="stat"><div class="n">${fmt(c.hib)}</div><div class="l">híbridos</div></div>
+ <div class="stat"><div class="n">${share}%</div><div class="l">da frota é eletrificada (${fmt(c.frota)} veículos)</div></div>
+ <div class="stat"><div class="n">${growth(c)}</div><div class="l">elétricos puros, ${c.gp}</div></div>
+</div>
+${c.ida!=null?`<p><strong>Turista:</strong> ${c.ida}% dos elétricos que vêm daqui até Rifaina e voltam no mesmo dia precisam carregar no caminho (${L('demanda-por-rota','Demanda por rota')}).</p>`:''}
+<h2>Leitura para a HI Energy</h2>
+<p>${CITYTXT[c.id]||''}</p>
+<p class="src">Frota: Senatran set/2026 · crescimento: ${c.uf==='SP'?'Detran-SP':'Senatran'} · ver ${L('frota-por-cidade','Frota por cidade')}, ${L('mapa-do-corredor','Mapa')}</p>`});
+});
+const CITYTXT={
+ 'rifaina':`Cidade pequena, com 4 elétricos puros e cerca de 3,5 mil veículos. O mercado da HI Energy está nas cidades ao redor e nos 150 mil turistas por ano da prainha. Ver ${L('corredor-sp334','Corredor')} e ${L('personas','Personas')}.`,
+ 'pedregulho':`A 26 km, ninguém precisa carregar para ir e voltar. Público de ${L('comprador-lugares','conveniência')}: Market, café e lazer na represa.`,
+ 'cristais-paulista':`Fica no caminho entre Franca e Pedregulho. Os elétricos foram de 1 para 7 em um ano. Público de conveniência.`,
+ 'franca':`Maior vizinho, com 521 elétricos puros e 1.287 híbridos, e os elétricos triplicaram em 12 meses. Ninguém precisa carregar para ir e voltar (70 km), então a mensagem é experiência: "carregue enquanto curte a prainha". É também o ponto que decide o corredor: se tiver carregador rápido, a parada em Rifaina deixa de ser obrigatória para quem vem de Ribeirão. ${L('validar','Validar')}.`,
+ 'batatais':`68% dos turistas daqui precisam carregar para voltar. Cidade média, com 48 elétricos puros e crescimento de +118% em um ano.`,
+ 'ribeirao-preto':`O maior mercado da região, com 2.416 elétricos puros, 5.679 híbridos e o dobro de um ano atrás. 94% dos turistas de elétrico precisam carregar para voltar, e é quem mais precisa da parada na rota para Araxá. Prioridade número 1 de conteúdo e de parcerias (${L('estrategia-hi-energy','Estratégia')}).`,
+ 'igarapava':`Fica na Anhanguera, fora do corredor de Rifaina. Tem poucos elétricos (2). Baixa prioridade.`,
+ 'sacramento':`Vizinho mineiro, a 35 km depois da ponte. Não tem carregador mapeado. Público de conveniência e de passagem rumo a Araxá.`,
+ 'araxa':`Polo mineiro do corredor, com 141 elétricos puros, +143% em nove meses e o maior PIB per capita da lista. Já tem carregadores rápidos (hotel Dona Beja), então a HI Energy é a parada seguinte para quem vai a SP. 54% dos turistas daqui precisam carregar para voltar de Rifaina.`,
+ 'perdizes':`Pequena, com 2 elétricos puros. Turista ocasional.`,
+ 'ibia':`Corredor do Alto Paranaíba. Ribeirão ↔ Ibiá: 95% precisam parar, e a parada em Rifaina resolve a viagem para 68% a 72%.`,
+ 'patrocinio':`51 elétricos puros e +70% em nove meses. Viagens de 288 a 378 km até Franca ou Ribeirão: quase todos param, e Rifaina disputa a parada com Araxá.`,
+ 'patos-de-minas':`90 elétricos puros, +137% em nove meses. Viagem longa: quase todos param antes em Araxá, e Rifaina vira a segunda parada.`,
+ 'uberaba':`437 elétricos puros, que dobraram em nove meses. A ida para Ribeirão não passa por Rifaina, mas a cidade fica a cerca de 100 km da prainha, e 51% dos turistas daqui precisam carregar para voltar. Público de turismo e de fim de semana.`,
+ 'uberlandia':`2.547 elétricos puros, o maior número em Minas fora de BH. Fica fora do corredor (cerca de 205 km), mas é um mercado turístico grande: quem vier até a represa precisa carregar para voltar. Vale testar anúncios segmentados.`
+};
+
+/* ---- Comprador ---- */
+add({id:'comprador-perfil',folder:'04 Comprador',title:'Quem compra carro elétrico: perfil e renda',tags:['comprador','renda'],props:{Idade:'30–49 anos, com pico entre 35 e 45',Renda:'Classes A/B. Intenção concentrada entre R$ 6 mil e R$ 15 mil por mês',Ticket:'Disposição de R$ 100–150 mil. Donos toleram até R$ 200 mil'},body:()=>`
+<div class="stats">
+ <div class="stat"><div class="n">35–45</div><div class="l">faixa de idade mais comum do comprador (Dados X / Abeifa)</div></div>
+ <div class="stat"><div class="n">38%</div><div class="l">dos interessados ganham de R$ 6 mil a R$ 15 mil por mês (Webmotors 2026)</div></div>
+ <div class="stat"><div class="n">41%</div><div class="l">de quem ganha mais de R$ 30 mil escolhe elétrico ou híbrido</div></div>
+ <div class="stat"><div class="n">68%</div><div class="l">dos donos aceitam pagar até R$ 200 mil</div></div>
+</div>
+<h2>O que as pesquisas dizem</h2>
+<ul>
+<li><strong>Renda:</strong> a adoção sobe com a renda. Entre os que pretendem comprar carro, 38% estão na faixa de R$ 6 mil a R$ 15 mil por mês, e acima de R$ 30 mil, 41% optam por elétrico ou híbrido (${X('https://www.webmotors.com.br/imprensa/lp/intencao-de-compra-segundo-semestre/','Webmotors, 2º sem/2026')}).</li>
+<li><strong>Classe social:</strong> o interesse é maior nas classes A e B, ligado a inovação, status e sofisticação. As classes C, D e E priorizam custo, manutenção e financiamento (Banco BV / Consumoteca, 2025, via ${X('https://smabc.org.br/quem-esta-pronto-para-comprar-um-carro-eletrico-no-brasil/','SMABC')}).</li>
+<li><strong>Idade e moradia:</strong> o interessado típico mora em centro urbano, tem de 30 a 49 anos e ganha de R$ 4 mil a R$ 12 mil (${X('https://www.mckinsey.com/br/our-insights/all-insights/o-futuro-da-mobilidade-no-brasil','McKinsey')}). A faixa mais comum entre compradores é de 35 a 45 anos (Dados X para a Abeifa).</li>
+<li><strong>Quanto paga:</strong> a maioria aceita pagar de R$ 100 mil a R$ 150 mil (${X('https://tecflow.com.br/2025/09/09/maioria-dos-brasileiros-esta-disposta-a-pagar-entre-r-100-mil-e-r-150-mil-por-carro-eletrico-ou-hibrido-aponta-pesquisa-da-webmotors/','Webmotors 2025')}). Entre os donos, 68% toleram até R$ 200 mil.</li>
+<li><strong>Na região:</strong> 84% dos elétricos são de pessoa física e 16% de empresas (${L('modelos-na-regiao','Detran-SP')}).</li>
+</ul>
+<h2>Três tipos de comprador</h2>
+<div class="grid2">
+ <div class="card"><h3>Eco-Tech · 36%</h3><p>Liga sustentabilidade e tecnologia. Responde a conteúdo sobre energia limpa e inovação.</p></div>
+ <div class="card"><h3>Pragmatic Saver · 35%</h3><p>Quer economia e praticidade. Responde a contas em reais e custo por km.</p></div>
+ <div class="card"><h3>Tech Elite Driver · 29%</h3><p>Busca inovação e status. Responde a experiência premium, conforto e exclusividade.</p></div>
+</div>
+<p class="src">Segmentação: Dados X para a Abeifa, via ${X('https://monitormercantil.com.br/carro-eletrico-e-sonho-de-consumo-so-para-14-dos-brasileiros/','Monitor Mercantil')}.</p>
+<h2>Renda nas cidades da região</h2>
+<p>O PIB per capita (IBGE 2023) mede produção por habitante, não renda das famílias, mas mostra onde há poder de compra: ${L('cidade-araxa','Araxá')} R$ 79,2 mil, ${L('cidade-ribeirao-preto','Ribeirão Preto')} R$ 74,9 mil, ${L('cidade-uberlandia','Uberlândia')} R$ 71,6 mil, ${L('cidade-uberaba','Uberaba')} R$ 70,1 mil e ${L('cidade-patos-de-minas','Patos de Minas')} R$ 51,2 mil. A média do Brasil é R$ 53,9 mil.</p>
+<p>Continua em ${L('comprador-motivos','Motivos e medos')} e ${L('personas','Personas')}.</p>`});
+
+add({id:'comprador-motivos',folder:'04 Comprador',title:'Motivos e medos do comprador',tags:['comprador','motivação'],props:{'Motivo nº 1':'Economia de combustível e custo-benefício','Medo nº 1':'Onde e como carregar'},body:()=>`
+<h2>Por que compram</h2>
+<div class="bars">
+ <div class="bar"><span class="lbl">Economia de combustível</span><span class="trk"><span class="fill" style="width:78%;display:block"></span></span><span class="v">78%</span></div>
+ <div class="bar"><span class="lbl">“O gasto menor compensa”</span><span class="trk"><span class="fill" style="width:76%;display:block"></span></span><span class="v">76%</span></div>
+ <div class="bar"><span class="lbl">Custo-benefício</span><span class="trk"><span class="fill" style="width:72%;display:block"></span></span><span class="v">72%</span></div>
+ <div class="bar"><span class="lbl">Autonomia</span><span class="trk"><span class="fill" style="width:43%;display:block"></span></span><span class="v">43%</span></div>
+ <div class="bar"><span class="lbl">Reputação da marca</span><span class="trk"><span class="fill" style="width:37%;display:block"></span></span><span class="v">37%</span></div>
+</div>
+<p class="src">78% e 76%: Instituto Locomotiva, jul/2026, 1,3 mil motoristas (${X('https://www.vrum.com.br/mercado/2026/10/7518425-87-dos-motoristas-brasileiros-consideram-comprar-carro-eletrico.html','Vrum')}) · 72%, 43% e 37%: Webmotors Autoinsights, jun/2026 (${X('https://esginside.com.br/2026/09/22/7-em-cada-10-brasileiros-desejam-comprar-um-carro-eletrificado-revela-webmotors/','ESG Inside')})</p>
+<h2>O interesse está em alta</h2>
+<ul>
+<li>87% dos motoristas considerariam comprar um elétrico: 50% "certamente" e 37% "provavelmente" (Locomotiva 2026).</li>
+<li>71,4% de quem ainda não tem um eletrificado pensa em comprar na próxima troca, 7 pontos acima de 2025 (Webmotors 2026).</li>
+<li>A busca por "comprar carro elétrico usado" subiu 71% entre janeiro e abril de 2026 (${X('https://minaspetro.com.br/busca-por-carro-eletrico-usado-cresce-71-no-brasil/','Webmotors via Minaspetro')}).</li>
+</ul>
+<h2>O que trava</h2>
+<ul>
+<li><strong>Preço do carro:</strong> 84% comprariam com mais interesse se o preço caísse (Locomotiva 2026).</li>
+<li><strong>Recarga:</strong> a infraestrutura limitada é um dos principais desafios no Brasil, e a preocupação com recarga afeta a escolha do modelo (${X('https://www.deloitte.com/br/pt/about/press-room/global-automotive-consumer.html','Deloitte 2026')}). 93% dos brasileiros esperam carregar em casa ou no trabalho (${X('https://autopapo.com.br/noticia/carro-eletrido-estudo-revela-que-recarga-e-a-principal-preocupacao-do-brasileiro/','Deloitte via AutoPapo')}).</li>
+<li><strong>Preferência por híbrido:</strong> 75% das buscas por eletrificados são de híbridos, e só 8,9% escolheriam um elétrico puro (Webmotors).</li>
+</ul>
+<div class="callout"><div class="ct">Para a HI Energy</div><p>O medo de não ter onde carregar é exatamente o que o posto resolve. O conteúdo deve responder a esse medo com números: quanto custa, quanto tempo leva e onde fica a próxima parada (${L('estrategia-hi-energy','Estratégia')}).</p></div>`});
+
+add({id:'comprador-canais',folder:'04 Comprador',title:'Canais e redes que o comprador consome',tags:['comprador','redes sociais'],props:{'Decisão':'Test drive e concessionária, seguidos de redes sociais','Rede principal':'YouTube e Instagram'},body:()=>`
+<h2>Onde decide</h2>
+<div class="bars">
+ <div class="bar"><span class="lbl">Visita à concessionária</span><span class="trk"><span class="fill" style="width:58%;display:block"></span></span><span class="v">58%</span></div>
+ <div class="bar"><span class="lbl">Redes sociais antes da compra</span><span class="trk"><span class="fill" style="width:44%;display:block"></span></span><span class="v">44%</span></div>
+ <div class="bar"><span class="lbl">Test drive convenceu (donos)</span><span class="trk"><span class="fill" style="width:44%;display:block"></span></span><span class="v">44%</span></div>
+ <div class="bar"><span class="lbl">Conteúdo em rede social despertou interesse (donos)</span><span class="trk"><span class="fill" style="width:12%;display:block"></span></span><span class="v">12%</span></div>
+ <div class="bar"><span class="lbl">Matérias na imprensa (donos)</span><span class="trk"><span class="fill" style="width:8%;display:block"></span></span><span class="v">8%</span></div>
+</div>
+<p class="src">58% e 44% (redes): Deloitte Global Automotive Consumer Study 2026, Brasil · 44%, 12% e 8%: Webmotors, pesquisa com donos de elétricos, abr/2025 (${X('https://fastcompanybrasil.com/autotech/brasileiros-consideram-carro-eletrico-hibrido/','Fast Company Brasil')})</p>
+<h2>Redes no Brasil (adultos)</h2>
+<div class="bars">
+ <div class="bar"><span class="lbl">YouTube</span><span class="trk"><span class="fill" style="width:100%;display:block"></span></span><span class="v">150 mi</span></div>
+ <div class="bar"><span class="lbl">Instagram</span><span class="trk"><span class="fill" style="width:98%;display:block"></span></span><span class="v">147 mi</span></div>
+ <div class="bar"><span class="lbl">TikTok (18+)</span><span class="trk"><span class="fill" style="width:87%;display:block"></span></span><span class="v">131 mi</span></div>
+</div>
+<p class="src">${X('https://datareportal.com/reports/digital-2026-brazil','DataReportal Digital 2026: Brazil')} (números via resumo secundário, conferir no relatório).</p>
+<h2>Canais do nicho que esse público assiste</h2>
+<ul>
+<li><strong>YouTube:</strong> Eletricarbr (205 mil inscritos), Guia do carro elétrico (+204% em um ano), Primo Auto (já gravou um eletroposto em Ribeirão), Viagens pelo Brasil (viagens com BYD), Opinião Sincera e A Roda.</li>
+<li><strong>Instagram:</strong> @diariodocarroeletrico (303 mil), @atm.evs (recarga), @avaliacaoreal, @alfredo__lira.</li>
+<li><strong>TikTok:</strong> @eletricarbr, @elzzamatos, @natihaid (viagem de 1.000 km), @lucas.faccina.</li>
+<li><strong>Apps de recarga:</strong> PlugShare e Google Maps. É onde o motorista procura onde carregar na estrada.</li>
+</ul>
+<p class="src">Lista completa no arquivo pesquisa-referencias-2026-11.md (vidIQ, nov/2026).</p>
+<div class="callout"><div class="ct">Para a HI Energy</div><p>Use reels curtos no Instagram e no TikTok para alcance, e peça um vídeo longo no YouTube a um criador da região para dar autoridade. O test drive pesa muito na decisão, então uma parceria com concessionárias BYD de Franca e Ribeirão (ex.: "test drive com recarga na prainha") conversa com o comprador no momento da escolha. Essa parceria é uma hipótese a testar.</p></div>`});
+
+add({id:'comprador-lugares',folder:'04 Comprador',title:'Lugares e hábitos do motorista de elétrico',tags:['comprador','hábitos'],props:{'Recarga do dia a dia':'Em casa ou no trabalho','Recarga rápida':'~30 minutos por sessão','Em viagem':'Prefere hotel e restaurante com carregador'},body:()=>`
+<h2>Como carrega</h2>
+<ul>
+<li><strong>No dia a dia, em casa:</strong> 93% esperam carregar em casa ou no trabalho (Deloitte). A recarga pública é usada principalmente em <strong>viagem</strong>, que é exatamente o momento da HI Energy.</li>
+<li><strong>Tempo de parada:</strong> uma sessão rápida dura em média 32,8 minutos, e 30,7 minutos em lojas de conveniência (dados dos EUA, Transportation Energy Institute, 4º tri/2025). É o tempo de um café com lanche.</li>
+<li><strong>Em viagem:</strong> o motorista prioriza hotéis e restaurantes com recarga garantida (${X('https://www.igreentransforma.com.br/transforme-seu-negocio-em-um-eletroposto-do-futuro-mob/','guia do setor')}).</li>
+<li><strong>Preço da recarga pública:</strong> de R$ 1,20 a R$ 2,50 por kWh, e mediana de R$ 1,39/kWh em Uberaba (Carregados).</li>
+</ul>
+<h2>Onde está</h2>
+<div class="grid2">
+ <div class="card"><h3>Confirmado</h3><p>Concessionárias (58% decidem lá), redes sociais (44%), apps de recarga, hotéis e restaurantes de estrada.</p></div>
+ <div class="card"><h3>Hipóteses a validar</h3><p>Condomínios de alto padrão, academias, shoppings, clubes e grupos de donos de BYD no WhatsApp e no Facebook, eventos do agronegócio (Araxá, Patrocínio, Ribeirão).</p></div>
+</div>
+<div class="callout warn"><div class="ct">Cuidado com números do setor</div><p>Um fornecedor afirma que quem carrega por 30 minutos gasta R$ 40 em média na loja. Não há fonte independente para esse número. Melhor medir no próprio Market (ticket de quem carregou contra quem não carregou).</p></div>
+<p>Aplicação em ${L('personas','Personas')} e ${L('estrategia-hi-energy','Estratégia')}.</p>`});
+
+add({id:'personas',folder:'04 Comprador',title:'Personas da HI Energy',tags:['comprador','personas','síntese'],props:{Base:'Síntese dos dados de frota, rota e pesquisas de comprador',Status:'Hipóteses, validar com entrevistas no posto'},body:()=>`
+<div class="grid2">
+ <div class="card"><h3>Família de Ribeirão no fim de semana</h3><p>Casal de 35–45 anos, classe A/B, Dolphin ou Song Plus, vem para a prainha no sábado. <strong>94%</strong> precisam carregar para voltar. Quer café, banheiro limpo, sombra e um lugar para as crianças.</p><p class="src">${L('cidade-ribeirao-preto','Ribeirão')} · ${L('demanda-por-rota','Demanda')}</p></div>
+ <div class="card"><h3>Profissional do corredor Araxá–Ribeirão</h3><p>Viaja a trabalho (agronegócio, mineração, saúde), tem Seal ou Song e pressa. <strong>60–75%</strong> param em Rifaina. Quer recarga rápida, Wi-Fi, café para viagem e nota fiscal para a empresa.</p><p class="src">${L('cidade-araxa','Araxá')} · ${L('corredor-sp334','Corredor')}</p></div>
+ <div class="card"><h3>Pragmático do Dolphin Mini</h3><p>Comprou pela economia e faz conta de tudo. Tem o menor raio (70–100 km de ida e volta) e é o que mais depende da parada. Responde a preço do kWh, promoções e "quanto custou".</p><p class="src">${L('modelos-na-regiao','Modelos')} · ${L('raio-de-recarga','Raio')}</p></div>
+ <div class="card"><h3>Vizinho de Franca e Pedregulho</h3><p>Não precisa carregar (0%), mas vem pelo lazer na represa. Usa o Market como ponto de encontro. Responde a experiência, eventos e conteúdo local.</p><p class="src">${L('cidade-franca','Franca')} · ${L('cidade-pedregulho','Pedregulho')}</p></div>
+</div>`});
+
+/* ---- Estratégia ---- */
+add({id:'estrategia-hi-energy',folder:'05 Estratégia',title:'Estratégia: o que a pesquisa muda',tags:['estratégia'],props:{Prioridade:'Ribeirão (turista + corredor), Araxá, Uberaba e Uberlândia (turista)',Mensagem:'Recarga sem medo, com o tempo de parada preenchido pelo Market'},body:()=>`
+<h2>Prioridade de público</h2>
+<ol>
+<li><strong>${L('cidade-ribeirao-preto','Ribeirão Preto')}:</strong> maior frota (2.416 elétricos puros), 94% dos turistas precisam carregar e é o eixo principal do corredor.</li>
+<li><strong>${L('cidade-araxa','Araxá')} e o Alto Paranaíba:</strong> crescimento acima de 100%, renda alta e passagem obrigatória por Rifaina para ir a SP.</li>
+<li><strong>${L('cidade-uberaba','Uberaba')} e ${L('cidade-uberlandia','Uberlândia')}:</strong> quase 3 mil elétricos puros juntas. Público de turismo de fim de semana, para anúncios segmentados.</li>
+<li><strong>${L('cidade-franca','Franca')}:</strong> elétricos triplicaram em um ano. Público de experiência e de Market.</li>
+</ol>
+<h2>Instagram</h2>
+<ul>
+<li><strong>Segmentação de anúncios:</strong> Ribeirão, Franca, Batatais, Araxá, Uberaba e Uberlândia. Faixa de 30–50 anos, interesse em carros elétricos e BYD.</li>
+<li><strong>Conteúdo para o medo:</strong> tutorial de recarga, "quanto custa" e "Ribeirão → prainha e volta sem carregar? 94% não conseguem".</li>
+<li><strong>Conteúdo para cada tipo de comprador:</strong> economia para o Pragmatic Saver, energia limpa para o Eco-Tech e experiência premium para o Tech Elite (${L('comprador-perfil','Perfil')}).</li>
+<li><strong>Dolphin Mini no gancho:</strong> "dono de Dolphin Mini, isso é para você".</li>
+</ul>
+<h2>Operação e parcerias</h2>
+<ul>
+<li>Cadastro completo no PlugShare e no Google Maps (${L('comprador-canais','Canais')}).</li>
+<li>Combo "recarga + café" pensado para cerca de 30 minutos (${L('comprador-lugares','Lugares')}).</li>
+<li>Parceria com pousadas da represa e com concessionárias BYD da região (hipótese).</li>
+<li>Registrar de cada cliente: cidade de origem, destino, carro e % de chegada.</li>
+</ul>`});
+
+add({id:'validar',folder:'05 Estratégia',title:'O que validar',tags:['estratégia','pendências'],props:{Status:'Aberto'},body:()=>`
+<ol>
+<li><strong>Carregador rápido em Franca:</strong> conferir no PlugShare. É o que mais muda a demanda do corredor (${L('corredor-sp334','Corredor')}).</li>
+<li><strong>Distâncias estimadas</strong> (Ribeirão, Batatais, Ibiá, Patrocínio, Uberaba, Uberlândia): conferir no Google Maps.</li>
+<li><strong>Dados da HI Energy:</strong> preço do kWh, potência, conectores, horário e cardápio do Market.</li>
+<li><strong>Personas:</strong> entrevistar 20 clientes no posto (${L('personas','Personas')}).</li>
+<li><strong>Gasto no Market:</strong> ticket de quem carrega contra quem não carrega.</li>
+</ol>`});
+
+add({id:'metodologia',folder:'05 Estratégia',title:'Metodologia',tags:['método'],props:{},body:()=>`
+<ul>
+<li><strong>Frota por cidade:</strong> planilha oficial da Senatran "Frota por UF, Município e Combustível" (set/2026). Elétrico puro = ELETRICO, ELETRICO/FONTE EXTERNA e ELETRICO/FONTE INTERNA. Híbrido = qualquer combustível combinado com ELETRICO. Inclui todos os tipos de veículo.</li>
+<li><strong>Conferência em SP:</strong> base de frota ativa do Detran-SP (out/2026), filtrando automóveis, camionetas e utilitários. Os números de carros batem com a Senatran (ex.: Franca 502 carros elétricos contra 521 veículos).</li>
+<li><strong>Crescimento:</strong> SP com Detran-SP out/2025 → out/2026; MG com Senatran dez/2025 → set/2026 (9 meses).</li>
+<li><strong>Modelos:</strong> campo marca/modelo do Detran-SP, somando as versões de cada modelo.</li>
+<li><strong>Probabilidades:</strong> simulação de 200 mil carros nas faixas de ${L('raio-de-recarga','autonomia útil')}, com +10 km de consumo pela subida do vale. Distâncias com "~" foram estimadas pela linha reta × 1,38, calibrada com 4 trechos conhecidos.</li>
+<li><strong>Comprador:</strong> pesquisas públicas de 2024 a 2026. Cada número leva a fonte ao lado. Intenção de compra não é compra efetiva.</li>
+</ul>`});
+
+add({id:'fontes',folder:'05 Estratégia',title:'Fontes',tags:['fontes'],props:{},body:()=>`
+<h3>Frota e mercado</h3><ul>
+<li>${X('https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/frota-de-veiculos-2026','Senatran, frota de veículos 2026')} · planilha por município e combustível, set/2026; dez/2025 em ${X('https://www.gov.br/transportes/pt-br/assuntos/transito/conteudo-Senatran/frota-de-veiculos-2025','frota 2025')}</li>
+<li>${X('https://dadosabertos.sp.gov.br/dataset/frota-ativa','Detran-SP, frota ativa (dados abertos)')}, out/2025 e out/2026</li>
+<li>${X('https://www.correiodamanha.com.br/nacional/sao-paulo/estado-de-sao-paulo/2026/09/319771-sp-tem-56-mil-carros-eletricos-e-capital-concentra-31-da-frota-estadual.html','Correio da Manhã: SP tem 56 mil carros elétricos')}</li>
+<li>${X('https://www.dgabc.com.br/Noticia/4349176/frota-eletrificada-do-brasil-chega-a-1-milhao-de-veiculos-diz-abve','ABVE: frota eletrificada chega a 1 milhão')}</li>
+<li>${X('https://diariodeuberlandia.com.br/noticia/41510/uberlandia-tem-alta-de-136-em-emplacamento-carros-eletricos-2026','Diário de Uberlândia: emplacamentos 2026')}</li>
+<li>${X('https://regionalzao.com.br/economia/empresa-uberlandia-expansao-155-eletropostos-minas-2027/','Regionalzão: NuCharge +155 eletropostos em MG')}</li>
+<li>${X('https://www.ibge.gov.br/cidades-e-estados/sp/ribeirao-preto.html','IBGE Cidades')} · ${X('https://pt.wikipedia.org/wiki/Lista_de_munic%C3%ADpios_de_Minas_Gerais_por_PIB','PIB dos municípios de MG')}</li></ul>
+<h3>Comprador</h3><ul>
+<li>${X('https://www.webmotors.com.br/imprensa/lp/intencao-de-compra-segundo-semestre/','Webmotors: intenção de compra 2º sem/2026')}</li>
+<li>${X('https://esginside.com.br/2026/09/22/7-em-cada-10-brasileiros-desejam-comprar-um-carro-eletrificado-revela-webmotors/','Webmotors Autoinsights 2026 (ESG Inside)')}</li>
+<li>${X('https://fastcompanybrasil.com/autotech/brasileiros-consideram-carro-eletrico-hibrido/','Fast Company Brasil: 7 em cada 10 consideram eletrificado')}</li>
+<li>${X('https://www.vrum.com.br/mercado/2026/10/7518425-87-dos-motoristas-brasileiros-consideram-comprar-carro-eletrico.html','Locomotiva 2026 (Vrum)')}</li>
+<li>${X('https://www.deloitte.com/br/pt/about/press-room/global-automotive-consumer.html','Deloitte Global Automotive Consumer Study 2026')} · ${X('https://autopapo.com.br/noticia/carro-eletrido-estudo-revela-que-recarga-e-a-principal-preocupacao-do-brasileiro/','AutoPapo: recarga é a principal preocupação')}</li>
+<li>${X('https://www.mckinsey.com/br/our-insights/all-insights/o-futuro-da-mobilidade-no-brasil','McKinsey: o futuro da mobilidade no Brasil')}</li>
+<li>${X('https://smabc.org.br/quem-esta-pronto-para-comprar-um-carro-eletrico-no-brasil/','SMABC: quem está pronto para comprar')} · ${X('https://monitormercantil.com.br/carro-eletrico-e-sonho-de-consumo-so-para-14-dos-brasileiros/','Monitor Mercantil (OLX, Dados X)')}</li>
+<li>${X('https://tecflow.com.br/2025/09/09/maioria-dos-brasileiros-esta-disposta-a-pagar-entre-r-100-mil-e-r-150-mil-por-carro-eletrico-ou-hibrido-aponta-pesquisa-da-webmotors/','Webmotors 2025: disposição de pagar')}</li>
+<li>${X('https://minaspetro.com.br/busca-por-carro-eletrico-usado-cresce-71-no-brasil/','Busca por elétrico usado +71%')}</li>
+<li>${X('https://datareportal.com/reports/digital-2026-brazil','DataReportal Digital 2026: Brazil')}</li></ul>
+<h3>Território</h3><ul>
+<li>${X('https://en.wikipedia.org/wiki/Rodovia_C%C3%A2ndido_Portinari','SP-334 Rodovia Cândido Portinari')} · ${X('https://www.achedistancia.com.br/distancia-de-araxa-a-rifaina.html','Araxá–Rifaina')} · ${X('https://www.rotamapas.com.br/distancia-entre-sacramento-e-rifaina','Sacramento–Rifaina')}</li>
+<li>${X('https://www.gazetasp.com.br/turismo/a-prainha-que-deu-certo-no-interior-de-sp-que-recebe-150-mil/','Gazeta SP: prainha recebe 150 mil turistas')}</li>
+<li>${X('https://evblog.com.br/modelo/byd-dolphin-mini/','EVblog: autonomia do Dolphin Mini')}</li></ul>`});
+
+/* ============ MOTOR DO COFRE ============ */
+const FOLDERS=['00 Painel','01 Território','02 Frota elétrica','03 Cidades','04 Comprador','05 Estratégia'];
+const FCOLOR={'00 Painel':'#E8F1EC','01 Território':'#E3A44A','02 Frota elétrica':'#A9CF4A','03 Cidades':'#7FB2E5','04 Comprador':'#C7A4F0','05 Estratégia':'#F07F7F'};
+const byId=Object.fromEntries(NOTES.map(n=>[n.id,n]));
+const render=s=>s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(m,id,t)=>byId[id]?`<a class="wl" href="#${id}" data-id="${id}">${t}</a>`:t);
+// links
+NOTES.forEach(n=>{n.html=render(n.body());n.out=[...new Set([...n.html.matchAll(/data-id="([^"]+)"/g)].map(m=>m[1]).filter(i=>i!==n.id))];});
+NOTES.forEach(n=>n.back=NOTES.filter(o=>o.out.includes(n.id)).map(o=>o.id));
+const EDGES=[];NOTES.forEach(n=>n.out.forEach(t=>{if(!EDGES.some(e=>(e[0]===t&&e[1]===n.id)))EDGES.push([n.id,t])}));
+
+const $=s=>document.querySelector(s);
+let open=['inicio'],cur='inicio',filter='';
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let closed=new Set(store.get('hi-closed',['03 Cidades']));
+
+function tree(){
+  const q=filter.trim().toLowerCase();
+  const hit=n=>!q||(n.title+' '+n.tags.join(' ')+' '+n.html.replace(/<[^>]+>/g,' ')).toLowerCase().includes(q);
+  let cnt=0;
+  $('#tree').innerHTML=FOLDERS.map(f=>{
+    const fs=NOTES.filter(n=>n.folder===f&&hit(n));cnt+=fs.length;
+    if(q&&!fs.length)return '';
+    const isClosed=!q&&closed.has(f);
+    return `<div class="folder ${isClosed?'closed':''}" data-f="${f}"><button aria-expanded="${!isClosed}"><span class="chev">▾</span>${f.slice(3)} <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)">${fs.length}</span></button><div class="files">${fs.map(n=>{let t=n.title;if(q){const i=t.toLowerCase().indexOf(q);if(i>=0)t=t.slice(0,i)+'<mark>'+t.slice(i,i+q.length)+'</mark>'+t.slice(i+q.length)}return `<button class="file ${n.id===cur?'active':''}" data-id="${n.id}">${t}</button>`}).join('')}</div></div>`}).join('');
+  $('#count').textContent=`${cnt} de ${NOTES.length} notas · ${EDGES.length} links`;
+}
+function tabs(){
+  $('#tabs').innerHTML=open.map(id=>`<div class="tab ${id===cur?'active':''}" role="tab" aria-selected="${id===cur}" data-id="${id}"><span>${byId[id].title}</span>${open.length>1?`<button class="x" data-close="${id}" aria-label="Fechar aba">×</button>`:''}</div>`).join('');
+}
+function go(id,push=true){
+  if(!byId[id])id='inicio';
+  cur=id;if(!open.includes(id)){open.push(id);if(open.length>6)open.shift();}
+  const n=byId[id];
+  const props=Object.entries(n.props||{});
+  $('#note').innerHTML=`<div class="crumb">${n.folder.slice(3)} <span>/</span> <b>${n.title}</b></div><h1>${n.title}</h1>
+  <div>${n.tags.map(t=>`<span class="tag" data-tag="${t}">#${t.replace(/\s/g,'-')}</span>`).join('')}</div>
+  ${props.length?`<dl class="props">${props.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`:''}
+  ${n.html}
+  <div class="right-inline"><h3>Links desta nota</h3><p>${n.out.map(i=>`<a class="wl" href="#${i}" data-id="${i}">${byId[i].title}</a>`).join(' · ')||'—'}</p><h3>Citada em</h3><p>${n.back.map(i=>`<a class="wl" href="#${i}" data-id="${i}">${byId[i].title}</a>`).join(' · ')||'—'}</p></div>`;
+  $('#mtitle').textContent=n.title;
+  $('#scroll').scrollTop=0;
+  [...$('#note').querySelectorAll('h2')].forEach((h,i)=>h.id='s'+i);
+  $('#outline').innerHTML=[...$('#note').querySelectorAll('h2')].map(h=>`<a href="#${cur}" data-sec="${h.id}">${h.textContent}</a>`).join('')||'<div class="empty">Sem seções</div>';
+  $('#out').innerHTML=n.out.map(i=>`<button data-id="${i}">${byId[i].title}</button>`).join('')||'<div class="empty">Nenhum</div>';
+  $('#back').innerHTML=n.back.map(i=>`<button data-id="${i}">${byId[i].title}</button>`).join('')||'<div class="empty">Nenhum</div>';
+  document.querySelectorAll('.rbtn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.go===id));
+  tree();tabs();
+  if(push&&location.hash!=='#'+id){try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}}
+  if(id==='mapa-do-corredor')drawMap();
+  if(id==='frota-por-cidade')fleetTable('bev',-1);
+  if(id==='grafo')bigGraph();
+  localGraph();
+  $('#app').classList.remove('drawer');
+}
+document.addEventListener('click',e=>{
+  const sec=e.target.closest('[data-sec]');if(sec){e.preventDefault();document.getElementById(sec.dataset.sec)?.scrollIntoView({behavior:'smooth'});return}
+  const cl=e.target.closest('[data-close]');if(cl){e.stopPropagation();open=open.filter(i=>i!==cl.dataset.close);if(cur===cl.dataset.close)go(open[open.length-1]);else tabs();return}
+  const t=e.target.closest('[data-id]');if(t&&!t.closest('#ftable thead')){e.preventDefault();go(t.dataset.id);return}
+  const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
+  const f=e.target.closest('.folder>button');if(f){const k=f.parentElement.dataset.f;closed.has(k)?closed.delete(k):closed.add(k);store.set('hi-closed',[...closed]);tree();return}
+  const tg=e.target.closest('[data-tag]');if(tg){filter=tg.dataset.tag;$('#q').value=filter;tree();$('#app').classList.add('drawer');return}
+});
+$('#q').addEventListener('input',e=>{filter=e.target.value;tree()});
+$('#menu').addEventListener('click',()=>$('#app').classList.add('drawer'));
+$('#scrim').addEventListener('click',()=>$('#app').classList.remove('drawer'));
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur)go(h,false)});
+
+/* ---- tabela de frota ---- */
+function fleetTable(key,dir){
+  const rows=CITIES.map(c=>({...c,share:(c.bev+c.hib)/c.frota,g:c.b0>=10?pct(c.b0,c.b1):-1,ida:c.ida??-1}));
+  rows.sort((a,b)=>{const x=a[key],y=b[key];return (typeof x==='string'?x.localeCompare(y):x-y)*dir});
+  const tb=document.querySelector('#ftable tbody');if(!tb)return;
+  tb.innerHTML=rows.map(c=>`<tr><td><a class="wl" href="#cidade-${c.id}" data-id="cidade-${c.id}">${c.n}</a></td><td><span class="uf ${c.uf}">${c.uf}</span></td><td class="r">${c.km?(c.est?'~':'')+c.km:'—'}</td><td class="r">${fmt(c.bev)}</td><td class="r">${fmt(c.hib)}</td><td class="r">${(c.share*100).toFixed(2).replace('.',',')}%</td><td class="r">${growth(c)}</td><td class="r">${c.ida>=0?c.ida+'%':'—'}</td></tr>`).join('');
+  document.querySelectorAll('#ftable thead th').forEach(th=>{th.onclick=()=>{const k=th.dataset.sort;fleetTable(k,key===k?-dir:(k==='n'||k==='uf'||k==='km'?1:-1))};th.setAttribute('aria-sort',th.dataset.sort===key?(dir>0?'ascending':'descending'):'none')});
+}
+
+/* ---- mapa ---- */
+const LAYERS=store.get('hi-layers',{rings:true,bubbles:true,route:true,chargers:true,labels:true});
+function drawMap(){
+  const box=$('#mapbox');if(!box)return;
+  const W=640,H=860,lon0=-48.42,lat0=-18.45,sx=270,sy=287;
+  const pt=c=>{const x=(c.lon-lon0)*sx+20,y=(lat0-c.lat)*sy+30;return [x,y]};
+  const R=C.rifaina,[rx,ry]=pt(R),pxkm=sy/111;
+  const ring=(road,o)=>`<circle cx="${rx}" cy="${ry}" r="${(road/1.38*pxkm).toFixed(1)}" fill="#A9CF4A" fill-opacity="${o}" stroke="#A9CF4A" stroke-opacity=".6" stroke-width="1.6" stroke-dasharray="7 7"/>`;
+  const path=ids=>'M'+ids.map(i=>pt(C[i]).map(v=>v.toFixed(1)).join(' ')).join(' L');
+  const s=[];
+  s.push(`<rect width="${W}" height="${H}" fill="#0A1428" rx="8"/>`);
+  s.push(`<path d="M0 ${ry-36} C 120 ${ry-30}, 200 ${ry-14}, ${rx-30} ${ry-10} S ${rx+140} ${ry+20}, ${W} ${ry+90}" fill="none" stroke="#4F8CC0" stroke-opacity=".55" stroke-width="9" stroke-linecap="round"/>`);
+  s.push(`<text x="${W-150}" y="${ry+70}" fill="#6FA3D1" font-size="13" font-family="Inter,Arial">Rio Grande · divisa</text>`);
+  if(LAYERS.rings)s.push(`<g>${ring(175,.03)}${ring(125,.04)}${ring(100,.06)}</g>`);
+  if(LAYERS.route){
+    s.push(`<path d="${path(['ribeirao-preto','igarapava','uberaba','uberlandia'])}" fill="none" stroke="#5B6880" stroke-width="3.5" stroke-dasharray="9 8" stroke-linecap="round"/>`);
+    s.push(`<path d="${path(['ribeirao-preto','batatais','franca','cristais-paulista','pedregulho','rifaina','sacramento','araxa','ibia'])}" fill="none" stroke="#E8F1EC" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round"/>`);
+    s.push(`<path d="${path(['araxa','patrocinio','patos-de-minas'])}" fill="none" stroke="#E8F1EC" stroke-opacity=".6" stroke-width="3" stroke-dasharray="3 7" stroke-linecap="round"/>`);
+    s.push(`<path d="${path(['franca','cristais-paulista','pedregulho','rifaina','sacramento','araxa'])}" fill="none" stroke="#A9CF4A" stroke-width="4.5" stroke-dasharray="2 10" stroke-linecap="round"/>`);
+  }
+  CITIES.forEach(c=>{
+    const [x,y]=pt(c);const col=c.uf==='SP'?'#A9CF4A':'#7FB2E5';const isR=c.id==='rifaina';
+    const r=isR?11:6;const br=Math.max(0,Math.sqrt(c.bev)*1.15);
+    const ch=CHARGERS[c.id];
+    s.push(`<g class="city" tabindex="0" role="button" data-id="cidade-${c.id}" aria-label="${c.n}: ${c.bev} elétricos puros">`+
+      (LAYERS.bubbles&&!isR?`<circle cx="${x}" cy="${y}" r="${br.toFixed(1)}" fill="${col}" fill-opacity=".18" stroke="${col}" stroke-opacity=".5"/>`:'')+
+      (isR?`<circle cx="${x}" cy="${y}" r="22" fill="#A9CF4A" fill-opacity=".22"/>`:'')+
+      `<circle class="dot" cx="${x}" cy="${y}" r="${r}" fill="${isR?'#A9CF4A':col}" stroke="#050B1A" stroke-width="2"/>`+
+      (LAYERS.chargers&&ch?`<rect x="${x+8}" y="${y-20}" width="12" height="12" rx="3" fill="${ch==='rápido'?'#E3A44A':'#0A1428'}" stroke="#E3A44A" stroke-width="2"/>`:'')+
+      (LAYERS.labels?`<text x="${x>470?x-10:x+(isR?16:10)}" text-anchor="${x>470?'end':'start'}" y="${y+(isR?5:4)}" fill="${isR?'#A9CF4A':'#E8F1EC'}" font-size="${isR?17:13}" font-weight="${isR||c.bev>400?700:500}" font-family="${isR?'Montserrat,Arial':'Inter,Arial'}" paint-order="stroke" stroke="#0A1428" stroke-width="4">${c.n}${LAYERS.bubbles&&!isR?' · '+fmt(c.bev):''}</text>`:'')+
+    `</g>`);
+  });
+  box.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Mapa do corredor com Rifaina no centro">${s.join('')}</svg>`;
+  box.querySelectorAll('.city').forEach(g=>g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go(g.dataset.id)}}));
+  document.querySelectorAll('#layers .chip').forEach(b=>{b.setAttribute('aria-pressed',!!LAYERS[b.dataset.layer]);b.onclick=()=>{LAYERS[b.dataset.layer]=!LAYERS[b.dataset.layer];store.set('hi-layers',LAYERS);drawMap()}});
+}
+
+/* ---- grafos (força simples em canvas) ---- */
+function sim(nodes,edges,w,h,iters){
+  nodes.forEach((n,i)=>{if(n.x==null){const a=i*2.399;const rr=Math.sqrt(i+1)*22;n.x=w/2+Math.cos(a)*rr;n.y=h/2+Math.sin(a)*rr}n.vx=0;n.vy=0});
+  const idx=Object.fromEntries(nodes.map((n,i)=>[n.id,i]));const L0=Math.min(w,h)/7;
+  for(let k=0;k<iters;k++){
+    const cool=1-k/iters;
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;const d=Math.sqrt(dx*dx+dy*dy)+0.5;const f=L0*L0/d/d*0.6;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f}
+    edges.forEach(([s,t])=>{const a=nodes[idx[s]],b=nodes[idx[t]];if(!a||!b)return;const dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)+0.5,f=(d-L0)*0.03;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f});
+    nodes.forEach(n=>{if(n.fixed){n.vx=n.vy=0;return}n.vx+=(w/2-n.x)*0.01;n.vy+=(h/2-n.y)*0.01;const v=Math.hypot(n.vx,n.vy),m=8*cool+0.5;if(v>m){n.vx*=m/v;n.vy*=m/v}n.x+=n.vx;n.y+=n.vy;n.vx*=0.5;n.vy*=0.5;n.x=Math.max(20,Math.min(w-20,n.x));n.y=Math.max(16,Math.min(h-22,n.y))});
+  }
+}
+function paint(cv,nodes,edges,opt){
+  const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,r.width,r.height);
+  const idx=Object.fromEntries(nodes.map(n=>[n.id,n]));const hv=opt.hover;
+  const near=new Set();if(hv){near.add(hv);edges.forEach(([s,t])=>{if(s===hv)near.add(t);if(t===hv)near.add(s)})}
+  edges.forEach(([s,t])=>{const a=idx[s],b=idx[t];if(!a||!b)return;const on=hv&&(s===hv||t===hv);ctx.strokeStyle=on?'rgba(169,207,74,.8)':'rgba(138,151,171,'+(hv?.08:.22)+')';ctx.lineWidth=on?1.6:1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()});
+  nodes.forEach(n=>{const deg=byId[n.id].out.length+byId[n.id].back.length;const rad=n.id===cur?8:3+Math.min(6,Math.sqrt(deg)*1.2);const dim=hv&&!near.has(n.id);
+    ctx.globalAlpha=dim?.25:1;ctx.fillStyle=n.id===cur?'#A9CF4A':FCOLOR[byId[n.id].folder];ctx.beginPath();ctx.arc(n.x,n.y,rad,0,7);ctx.fill();
+    if((opt.labels&&(!opt.hubOnly||deg>=opt.hubOnly))||n.id===cur||near.has(n.id)){ctx.fillStyle=dim?'#5B6880':'#B7C3CE';ctx.font='11px Inter, Arial';ctx.textAlign='center';ctx.fillText(byId[n.id].title.replace(/ \((SP|MG)\)$/,'').slice(0,26),n.x,n.y+rad+12)}
+    ctx.globalAlpha=1;n.rad=rad});
+}
+function interactive(cv,nodes,edges,opt){
+  let drag=null,moved=false;const pos=e=>{const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return [p.clientX-r.left,p.clientY-r.top]};
+  const at=([x,y])=>nodes.find(n=>(n.x-x)**2+(n.y-y)**2<Math.max(64,(n.rad+4)**2));
+  cv.onpointermove=e=>{const p=pos(e);if(drag){drag.x=p[0];drag.y=p[1];moved=true;paint(cv,nodes,edges,opt);return}const n=at(p);opt.hover=n?n.id:null;cv.style.cursor=n?'pointer':'default';paint(cv,nodes,edges,opt)};
+  cv.onpointerdown=e=>{const n=at(pos(e));if(n){drag=n;moved=false;cv.setPointerCapture(e.pointerId)}};
+  cv.onpointerup=e=>{if(drag&&!moved)go(drag.id);drag=null};
+  cv.onpointerleave=()=>{opt.hover=null;paint(cv,nodes,edges,opt)};
+}
+let BIG=null;
+function bigGraph(){
+  const cv=$('#bg');if(!cv)return;const r=cv.getBoundingClientRect();
+  if(!BIG){BIG={nodes:NOTES.map(n=>({id:n.id})),opt:{labels:true,hubOnly:9}};sim(BIG.nodes,EDGES,r.width,r.height,400)}
+  paint(cv,BIG.nodes,EDGES,BIG.opt);interactive(cv,BIG.nodes,EDGES,BIG.opt);
+  $('#glegend').innerHTML=FOLDERS.map(f=>`<span><i style="background:${FCOLOR[f]}"></i>${f.slice(3)}</span>`).join('');
+}
+function localGraph(){
+  const cv=$('#lg');if(!cv||!cv.offsetParent)return;const r=cv.getBoundingClientRect();
+  const n=byId[cur];const ids=[cur,...new Set([...n.out,...n.back])];
+  const nodes=ids.map(id=>({id}));nodes[0].x=r.width/2;nodes[0].y=r.height/2;nodes[0].fixed=true;
+  const ed=EDGES.filter(([s,t])=>ids.includes(s)&&ids.includes(t));
+  const k=nodes.length-1;nodes.slice(1).forEach((nd,i)=>{const a=-Math.PI/2+i*2*Math.PI/Math.max(k,1);const rr=Math.min(r.width,r.height)*0.36;nd.x=r.width/2+Math.cos(a)*rr;nd.y=r.height/2+Math.sin(a)*rr*0.9});const opt={labels:k<=8};
+  paint(cv,nodes,ed,opt);interactive(cv,nodes,ed,opt);$('#lcount').textContent=ids.length-1+' links';
+}
+window.addEventListener('resize',()=>{localGraph();if(cur==='grafo'&&BIG)paint($('#bg'),BIG.nodes,EDGES,BIG.opt)});
+
+go((location.hash||'#inicio').slice(1),false);
+</script>
