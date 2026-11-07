@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Cofre de pesquisa HI Energy: corredor de recarga de Rifaina, frota elétrica por cidade e perfil do comprador.">
+<meta name="description" content="Cofre de pesquisa HI Energy: corredor de recarga de Rifaina, frota elétrica por cidade, perfil do comprador e mix do Market.">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 <title>HI Energy · Cofre de Pesquisa</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -240,7 +240,7 @@ const NOTES=[];
 const add=(o)=>NOTES.push(o);
 
 add({id:'inicio',folder:'00 Painel',title:'Painel do cofre',tags:['painel'],props:{Projeto:'HI Energy · @hienergy.rifaina',Atualizado:'06/11/2026',Responsável:'Wallace'},body:()=>`
-<p>Este cofre reúne a pesquisa de mercado da HI Energy, o eletroposto com Market em Rifaina/SP. Cada nota abre um ponto da pesquisa e os links ligam as ideias, como no Obsidian. Use o explorador à esquerda, a busca ou o grafo.</p>
+<p>Este cofre reúne a pesquisa de mercado da HI Energy, o eletroposto com Market em Rifaina/SP. Cada nota abre um ponto da pesquisa (agora com a pasta Market) e os links ligam as ideias, como no Obsidian. Use o explorador à esquerda, a busca ou o grafo.</p>
 <div class="stats">
  <div class="stat"><div class="n">${fmt(CITIES.filter(c=>c.grp!=='fora').reduce((s,c)=>s+c.bev,0))}</div><div class="l">elétricos puros nas 14 cidades da área de influência</div></div>
  <div class="stat"><div class="n">+201%</div><div class="l">crescimento dos elétricos em Franca em 12 meses</div></div>
@@ -260,6 +260,7 @@ add({id:'inicio',folder:'00 Painel',title:'Painel do cofre',tags:['painel'],prop
 <li><strong>Frota:</strong> ${L('frota-por-cidade','Frota por cidade')} · ${L('crescimento-da-frota','Crescimento')} · ${L('modelos-na-regiao','Modelos na região')}</li>
 <li><strong>Cidades:</strong> ${CITIES.map(c=>L('cidade-'+c.id,c.n)).join(' · ')}</li>
 <li><strong>Comprador:</strong> ${L('comprador-perfil','Perfil e renda')} · ${L('comprador-motivos','Motivos e medos')} · ${L('comprador-canais','Canais e redes')} · ${L('comprador-lugares','Lugares e hábitos')} · ${L('personas','Personas')}</li>
+<li><strong>Market:</strong> ${L('market-mais-vendidos','Mais vendidos')} · ${L('market-margem','Maior margem')} · ${L('market-custo-beneficio','Custo-benefício')} · ${L('market-validade','Validade × giro')} · ${L('market-publicos','Mix por público')} · ${L('market-fliperama','Fliperama')}</li>
 <li><strong>Ação:</strong> ${L('estrategia-hi-energy','Estratégia')} · ${L('validar','O que validar')} · ${L('metodologia','Metodologia')} · ${L('fontes','Fontes')}</li>
 </ul>`});
 
@@ -506,6 +507,7 @@ add({id:'estrategia-hi-energy',folder:'05 Estratégia',title:'Estratégia: o que
 <li><strong>Dolphin Mini no gancho:</strong> "dono de Dolphin Mini, isso é para você".</li>
 </ul>
 <h2>Operação e parcerias</h2>
+<p>Mix de produtos e fliperama em ${L('market-publicos','Mix por público')} e ${L('market-fliperama','Fliperama')}.</p>
 <ul>
 <li>Cadastro completo no PlugShare e no Google Maps (${L('comprador-canais','Canais')}).</li>
 <li>Combo "recarga + café" pensado para cerca de 30 minutos (${L('comprador-lugares','Lugares')}).</li>
@@ -557,9 +559,140 @@ add({id:'fontes',folder:'05 Estratégia',title:'Fontes',tags:['fontes'],props:{}
 <li>${X('https://www.gazetasp.com.br/turismo/a-prainha-que-deu-certo-no-interior-de-sp-que-recebe-150-mil/','Gazeta SP: prainha recebe 150 mil turistas')}</li>
 <li>${X('https://evblog.com.br/modelo/byd-dolphin-mini/','EVblog: autonomia do Dolphin Mini')}</li></ul>`});
 
+/* ---- Market (mix de produtos) ---- */
+// Margens e validades: estimativas de mercado (custo de compra × preço de prateleira). Conferir com notas de compra.
+const PROD=[
+ ['Bebidas','Água mineral 500 ml','alto',60,75,'12–24 meses','longa','geral eletrico pais'],
+ ['Bebidas','Refrigerante lata/600 ml','alto',40,55,'4–9 meses','longa','geral pais'],
+ ['Bebidas','Cerveja lata','alto',35,50,'6–12 meses','longa','geral'],
+ ['Bebidas','Energético','alto',40,50,'12–24 meses','longa','geral eletrico'],
+ ['Bebidas','Gelo (saco)','alto',60,75,'não vence','longa','geral'],
+ ['Bebidas','Suco de caixinha infantil','medio',40,50,'6–12 meses','longa','pais'],
+ ['Bebidas','Isotônico','medio',40,50,'9–12 meses','longa','geral eletrico'],
+ ['Bebidas','Água de coco caixinha','medio',35,45,'6–12 meses','longa','geral eletrico'],
+ ['Bebidas','Kombucha / funcional','baixo',35,45,'1–3 meses (refrigerado)','curta','eletrico'],
+ ['Bebidas','Vinho / destilado','baixo',30,45,'muito longa','longa','geral'],
+ ['Food service','Café expresso / coado','alto',75,85,'grão 6–12 meses · bebida feita na hora','longa','geral eletrico'],
+ ['Food service','Cappuccino / chocolate quente','medio',70,80,'pó 12+ meses','longa','eletrico pais'],
+ ['Food service','Pão de queijo (assado na hora)','alto',70,85,'congelado 6–12 meses · assado: mesmo dia','curta','geral eletrico pais'],
+ ['Food service','Salgado assado','alto',55,70,'congelado 3–6 meses · assado: mesmo dia','curta','geral eletrico'],
+ ['Food service','Misto quente / chapa','medio',55,65,'frios abertos 5–15 dias','curta','geral eletrico pais'],
+ ['Food service','Sanduíche natural pronto','medio',40,55,'2–5 dias','curta','eletrico'],
+ ['Food service','Salada de frutas','baixo',45,60,'1–3 dias','curta','eletrico pais'],
+ ['Food service','Bolo em fatia / brownie','medio',55,70,'3–7 dias','curta','eletrico pais'],
+ ['Bomboniere e snacks','Chocolate barra / bombom','alto',35,45,'9–12 meses','longa','geral pais'],
+ ['Bomboniere e snacks','Balas e chicletes','alto',45,60,'12–24 meses','longa','geral pais'],
+ ['Bomboniere e snacks','Salgadinho de pacote','alto',35,45,'3–6 meses','curta','geral pais'],
+ ['Bomboniere e snacks','Biscoito / wafer','medio',35,45,'6–12 meses','longa','pais'],
+ ['Bomboniere e snacks','Barra de cereal / proteína','medio',35,50,'6–12 meses','longa','eletrico'],
+ ['Bomboniere e snacks','Castanhas / amendoim','medio',40,55,'6–12 meses','longa','eletrico'],
+ ['Bomboniere e snacks','Produto artesanal local','baixo',30,50,'varia (queijo curto, doce longo)','curta','eletrico'],
+ ['Gelados','Picolé','alto',35,50,'12–24 meses','longa','geral pais'],
+ ['Gelados','Pote / casquinha','medio',35,45,'12–18 meses','longa','pais'],
+ ['Gelados','Açaí em copo','medio',45,60,'congelado 6–12 meses','longa','geral pais'],
+ ['Tabacaria','Cigarro','muito alto',4,10,'sem vencimento prático','longa','geral'],
+ ['Tabacaria','Isqueiro e acessórios','medio',50,100,'não vence','longa','geral'],
+ ['Viagem e prainha','Cabo / carregador / power bank','medio',60,100,'não vence','longa','eletrico'],
+ ['Viagem e prainha','Protetor solar / repelente','medio',35,50,'24–36 meses','longa','geral pais'],
+ ['Viagem e prainha','Higiene pessoal','baixo',35,50,'longa','longa','geral'],
+ ['Viagem e prainha','Lenço umedecido / fralda','baixo',30,40,'longa','longa','pais'],
+ ['Viagem e prainha','Óculos, boné, chinelo','baixo',60,100,'não vence','longa','geral'],
+ ['Viagem e prainha','Carvão / fósforo','medio',35,50,'não vence','longa','geral'],
+ ['Viagem e prainha','Pilhas','baixo',40,60,'longa','longa','geral']
+];
+const GIRO={'muito alto':'Muito alto','alto':'Alto','medio':'Médio','baixo':'Baixo'};
+const prodRows=list=>`<div class="tbl"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Giro</th><th class="r">Margem (estim.)</th><th>Validade típica</th></tr></thead><tbody>${list.map(p=>`<tr><td>${p[1]}</td><td>${p[0]}</td><td>${GIRO[p[2]]}</td><td class="r">${p[3]}–${p[4]}%</td><td style="white-space:normal;min-width:180px">${p[5]}</td></tr>`).join('')}</tbody></table></div>`;
+const EST=`<div class="callout warn"><div class="ct">Estimativa</div><p>As margens são faixas típicas de mercado (preço de prateleira contra custo de compra). Não há levantamento público recente por produto no Brasil. Antes de fixar preços, confira com as notas de compra do Market.</p></div>`;
+
+add({id:'market-mais-vendidos',folder:'06 Market',title:'O que mais vende em conveniência',tags:['market','vendas'],props:{Fonte:'Anuário Plural 2019 · Sindicom 2015–2016','Ticket médio':'R$ 11,91 (Sindicom 2016)'},body:()=>`
+<h2>Participação no faturamento</h2>
+<div class="bars">
+${[['Tabacaria',40.3],['Cervejas',21.1],['Bebidas não alcoólicas',17.8],['Food service (lojas que têm)',16.4],['Bomboniere',9.5],['Snacks e biscoitos',5.0],['Sorvetes',4.7]].map(([k,v])=>`<div class="bar"><span class="lbl">${k}</span><span class="trk"><span class="fill" style="width:${v/40.3*100}%;display:block"></span></span><span class="v">${String(v).replace('.',',')}%</span></div>`).join('')}
+</div>
+<p class="src">Plural 2019 (lojas sem food service) via ${X('https://www.brasilpostos.com.br/noticias/loja-de-conveniencia/posto-fatura-milhoes-mas-a-margem-pode-estar-na-conveniencia/','Brasil Postos')} · food service entre 15,4% e 17,4% (Sindicom, ${X('https://sinpospetrocampinas.com.br/lojas-de-conveniencia-setor-fatura-r-72-bilhoes-por-ano/','Sinpospetro')})</p>
+<div class="callout"><div class="ct">O que isso significa</div><p>Cigarro e cerveja trazem gente para a loja, mas dão pouco lucro. Nos EUA, o food service é 27,7% das vendas e 38,6% do lucro bruto da loja (NACS 2024). Ver ${L('market-margem','Maior margem')}.</p></div>
+<h2>Todos os produtos pesquisados</h2>
+<div class="chips" id="pcat">${['Todos',...new Set(PROD.map(p=>p[0]))].map((c,i)=>`<button class="chip" data-pcat="${c}" aria-pressed="${i===0}">${c}</button>`).join('')}</div>
+<div id="plist">${prodRows(PROD)}</div>${EST}`});
+
+add({id:'market-margem',folder:'06 Market',title:'Produtos com maior margem',tags:['market','margem'],props:{'Maior margem':'Café, pão de queijo, cappuccino','Menor margem':'Cigarro (4–10%)'},body:()=>{
+ const top=[...PROD].sort((a,b)=>(b[3]+b[4])-(a[3]+a[4]));
+ const bar=list=>list.map(p=>`<div class="bar"><span class="lbl" title="${p[1]}">${p[1]}</span><span class="trk"><span class="fill" style="width:${(p[3]+p[4])/2}%;display:block"></span></span><span class="v">${p[3]}–${p[4]}%</span></div>`).join('');
+ return `<h2>Top 10 em margem</h2><div class="bars">${bar(top.slice(0,10))}</div>
+<p>Os acessórios (cabos, isqueiros, óculos) têm margem alta, mas vendem pouco. Quem junta <strong>margem alta e muita venda</strong> é o trio café, pão de queijo e água gelada.</p>
+<h2>Menor margem</h2><div class="bars">${bar(top.slice(-5).reverse())}</div>
+<p class="src">Referências de mercado: ${X('https://www.posnation.com/blog/c-store-categories-with-surprisingly-high-margins','POS Nation')} (alimento preparado 40–60%, bebidas 30–45%, tabaco 8–15%) · ${X('https://negociosbrasil.com.br/como-comprar-uma-loja-de-conveniencia/','Negócios Brasil')} (cigarro 4–8%, bebida gelada 35–60%)</p>${EST}
+<p>Próximo: ${L('market-custo-beneficio','Custo-benefício')} · ${L('market-validade','Validade × giro')}</p>`}});
+
+add({id:'market-custo-beneficio',folder:'06 Market',title:'Melhor custo-benefício',tags:['market','custo-benefício'],props:{Critério:'Bom para a loja (margem, giro, pouca perda) e justo para o cliente'},body:()=>`
+<div class="tbl"><table><thead><tr><th>#</th><th>Produto</th><th style="white-space:normal">Por quê</th></tr></thead><tbody>
+<tr><td>1</td><td>Combo café + pão de queijo</td><td style="white-space:normal">Margem alta nos dois, sai em 2 min, insumo congelado (não perde) e cabe nos ~30 min de recarga</td></tr>
+<tr><td>2</td><td>Água mineral</td><td style="white-space:normal">Todo mundo compra, margem alta e validade de 1–2 anos</td></tr>
+<tr><td>3</td><td>Energético e isotônico</td><td style="white-space:normal">Ticket alto, validade longa, público de estrada</td></tr>
+<tr><td>4</td><td>Picolé</td><td style="white-space:normal">Vende para criança e adulto, validade longa</td></tr>
+<tr><td>5</td><td>Gelo</td><td style="white-space:normal">Custo baixo, não vence, essencial para a prainha</td></tr>
+<tr><td>6</td><td>Balas e chicletes no caixa</td><td style="white-space:normal">Compra por impulso, validade longa</td></tr>
+<tr><td>7</td><td>Kit criança</td><td style="white-space:normal">Suco + biscoito ou pão de queijo + picolé: aumenta o ticket dos pais</td></tr>
+</tbody></table></div>
+<p>Ver também ${L('market-publicos','Mix por público')} e ${L('comprador-lugares','Lugares e hábitos')} (a parada rápida dura cerca de 30 minutos).</p>`});
+
+add({id:'market-validade',folder:'06 Market',title:'Validade × giro',tags:['market','validade','estoque'],props:{Regra:'Vende muito e estraga rápido: comprar congelado e assar pela demanda'},body:()=>{
+ const cell=(g,v)=>PROD.filter(p=>(g==='alto'?['alto','muito alto'].includes(p[2]):['medio','baixo'].includes(p[2]))&&p[6]===v).map(p=>`<li><strong>${p[1]}</strong> · ${p[5]}</li>`).join('');
+ return `<p>Os produtos de giro médio entram junto com os que vendem pouco, porque pedem o mesmo cuidado de estoque.</p>
+<div class="grid2">
+ <div class="card"><h3>Vende muito · validade curta</h3><ul>${cell('alto','curta')}</ul><p><strong>Regra:</strong> comprar congelado e assar aos poucos, anotando a sobra do dia.</p></div>
+ <div class="card"><h3>Vende muito · validade longa</h3><ul>${cell('alto','longa')}</ul><p><strong>Regra:</strong> é a base do Market, nunca pode faltar.</p></div>
+ <div class="card" style="border-color:rgba(227,164,74,.5)"><h3>Vende pouco · validade curta</h3><ul>${cell('baixo','curta')}</ul><p><strong>Regra:</strong> é o canto do risco. Evitar no começo, ou trabalhar sob encomenda e em quantidade mínima.</p></div>
+ <div class="card"><h3>Vende pouco · validade longa</h3><ul>${cell('baixo','longa')}</ul><p><strong>Regra:</strong> pouca quantidade num expositor visível.</p></div>
+</div>
+<p class="src">Validades típicas de mercado. Confirmar sempre na embalagem do fornecedor.</p>`}});
+
+add({id:'market-publicos',folder:'06 Market',title:'Mix por público',tags:['market','público'],props:{Públicos:'Geral (turista e morador) · motorista de elétrico · pais com filhos'},body:()=>`
+<div class="chips" id="ppub">${[['geral','Público geral'],['eletrico','Motorista de elétrico'],['pais','Pais com filhos']].map(([k,t],i)=>`<button class="chip" data-ppub="${k}" aria-pressed="${i===0}">${t}</button>`).join('')}</div>
+<div id="pubtxt"></div>
+<div id="publist"></div>`});
+
+add({id:'market-fliperama',folder:'06 Market',title:'Fliperama: como cobrar',tags:['market','fliperama','crianças'],props:{Investimento:'R$ 2.800 a R$ 6.500 (nov/2026)',Recomendação:'2 jogadores, tela de 32", ficheiro + Pix','Payback ilustrativo':'3 a 4 meses'},body:()=>`
+<div class="stats">
+ <div class="stat"><div class="n">R$ 2</div><div class="l">por ficha (ou 3 por R$ 5)</div></div>
+ <div class="stat"><div class="n">R$ 5</div><div class="l">por 10 minutos: “joga enquanto carrega”</div></div>
+ <div class="stat"><div class="n">~R$ 1.300</div><div class="l">por mês na conta ilustrativa (15 fichas/dia na semana, 40 no fim de semana)</div></div>
+</div>
+<h2>Sete formas de cobrar</h2>
+<ol>
+<li><strong>Ficha no caixa (ficheiro):</strong> R$ 2 ou 3 por R$ 5. O cliente passa pelo balcão e compra mais.</li>
+<li><strong>Pix por QR Code na máquina:</strong> um módulo Pix libera créditos sozinho, sem moeda e sem funcionário.</li>
+<li><strong>Por tempo:</strong> R$ 5 = 10 minutos de jogo livre.</li>
+<li><strong>Brinde com a recarga:</strong> recarga acima de R$ [X] ganha 2 fichas.</li>
+<li><strong>Combo:</strong> "kit criança + 2 fichas" ou "café + 1 ficha" para o pai.</li>
+<li><strong>Cartão recarregável da família:</strong> R$ 20 de créditos guardados para a próxima visita.</li>
+<li><strong>Ranking do mês:</strong> o melhor placar ganha um café ou um picolé, com foto no Instagram.</li>
+</ol>
+<h2>Onde comprar (preços nov/2026)</h2>
+<ul>
+<li>${X('https://www.clubedofliperama.com.br/fliperama-comercial','Clube do Fliperama')}: linha comercial a partir de R$ 2.799,90</li>
+<li>${X('https://www.malvadezagames.com/','Malvadeza Games')}: 32" com ficheiro ou moedeiro, ~R$ 3.000–5.300</li>
+<li>${X('https://www.arcadeplaygames.com.br/premium-space','Arcade Play Games')}: premium de 4 jogadores, R$ 6.272,50 no Pix</li>
+<li>${X('https://lista.mercadolivre.com.br/maquina-fliperama','Mercado Livre')} · ${X('https://www.olx.com.br/anuncios/maquinas-de-fliperamas','OLX')} · ${X('https://fabricadasinuca.com.br/collections/pinball','Fábrica da Sinuca')}: R$ 1.000–4.500</li>
+</ul>
+<div class="callout warn"><div class="ct">Cuidados</div><p>Só jogos de habilidade, com classificação livre e <strong>sem prêmio em dinheiro</strong>, que pode ser enquadrado como jogo de azar. Prêmio em produto é seguro. Conferir com a prefeitura de Rifaina se precisa de licença.</p></div>
+<p>O fliperama atende os ${L('personas','pais com filhos')} e vira conteúdo de Instagram (${L('estrategia-hi-energy','Estratégia')}). A receita é ilustrativa: não há dados públicos de faturamento de fliperama, então o ideal é medir nos primeiros 30 dias.</p>`});
+
+const PUBTXT={
+ geral:`<p><strong>Quem é:</strong> morador e turista da prainha. Quer rapidez, bebida gelada e itens de praia. O pico é no fim de semana e nos feriados de calor.</p><p><strong>Ação:</strong> geladeira de bebidas na entrada e combo <strong>"kit represa"</strong> (gelo + 6 bebidas + salgadinho).</p>`,
+ eletrico:`<p><strong>Quem é:</strong> 35–45 anos, classes A/B, fica parado cerca de 30 minutos (${L('comprador-perfil','Perfil')}). Quer café de qualidade, Wi-Fi, tomada na mesa, banheiro impecável e produtos da região para levar.</p><p><strong>Ação:</strong> combo <strong>"Recarga + café"</strong> e cartão fidelidade (a 5ª recarga ganha um café). Ter café, queijo e doce de leite da Alta Mogiana para presente.</p>`,
+ pais:`<p><strong>Quem é:</strong> família que precisa distrair a criança e fazer um lanche fácil.</p><p><strong>Ação:</strong> <strong>"kit criança"</strong> com preço fechado, cantinho com mesa baixa e papel para desenhar, e o ${L('market-fliperama','fliperama')}.</p>`
+};
+function marketWire(){
+  const pc=document.getElementById('pcat');
+  if(pc)pc.onclick=e=>{const b=e.target.closest('[data-pcat]');if(!b)return;pc.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));const c=b.dataset.pcat;document.getElementById('plist').innerHTML=prodRows(c==='Todos'?PROD:PROD.filter(p=>p[0]===c))};
+  const pp=document.getElementById('ppub');
+  if(pp){const show=k=>{pp.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x.dataset.ppub===k));document.getElementById('pubtxt').innerHTML=render(PUBTXT[k]);const list=PROD.filter(p=>p[7].split(' ').includes(k)).sort((a,b)=>(b[3]+b[4])-(a[3]+a[4]));document.getElementById('publist').innerHTML='<h2>Produtos para este público (por margem)</h2>'+prodRows(list)+EST};pp.onclick=e=>{const b=e.target.closest('[data-ppub]');if(b)show(b.dataset.ppub)};show('geral')}
+}
+
 /* ============ MOTOR DO COFRE ============ */
-const FOLDERS=['00 Painel','01 Território','02 Frota elétrica','03 Cidades','04 Comprador','05 Estratégia'];
-const FCOLOR={'00 Painel':'#E8F1EC','01 Território':'#E3A44A','02 Frota elétrica':'#A9CF4A','03 Cidades':'#7FB2E5','04 Comprador':'#C7A4F0','05 Estratégia':'#F07F7F'};
+const FOLDERS=['00 Painel','01 Território','02 Frota elétrica','03 Cidades','04 Comprador','05 Estratégia','06 Market'];
+const FCOLOR={'00 Painel':'#E8F1EC','01 Território':'#E3A44A','02 Frota elétrica':'#A9CF4A','03 Cidades':'#7FB2E5','04 Comprador':'#C7A4F0','05 Estratégia':'#F07F7F','06 Market':'#5FD3C4'};
 const byId=Object.fromEntries(NOTES.map(n=>[n.id,n]));
 const render=s=>s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(m,id,t)=>byId[id]?`<a class="wl" href="#${id}" data-id="${id}">${t}</a>`:t);
 // links
@@ -608,6 +741,7 @@ function go(id,push=true){
   if(id==='mapa-do-corredor')drawMap();
   if(id==='frota-por-cidade')fleetTable('bev',-1);
   if(id==='grafo')bigGraph();
+  marketWire();
   localGraph();
   $('#app').classList.remove('drawer');hideTip();
 }
@@ -626,7 +760,7 @@ window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h
 
 /* ---- dica ao passar o mouse ---- */
 const KEYS={
- 'inicio':'Ponto de partida: 33 notas sobre território, frota, comprador e estratégia.',
+ 'inicio':'Ponto de partida: 39 notas sobre território, frota, comprador, estratégia e Market.',
  'grafo':'Mapa das ligações entre todas as notas.',
  'mapa-do-corredor':'15 cidades, rota SP-334/MG-428 e anéis de raio útil a partir de Rifaina.',
  'corredor-sp334':'~173 km entre Franca e Araxá sem carregador rápido confirmado. Rifaina fica no fundo do vale (~570 m).',
@@ -643,6 +777,12 @@ const KEYS={
  'estrategia-hi-energy':'Prioridade: Ribeirão, Araxá/Alto Paranaíba, Uberaba/Uberlândia (turismo) e Franca.',
  'validar':'5 pendências. A principal: Franca tem carregador rápido?',
  'metodologia':'Senatran set/2026 + Detran-SP out/2025 e out/2026 + simulação de 200 mil carros.',
+ 'market-mais-vendidos':'Tabacaria 40% · cerveja 21% · bebidas 18% do faturamento. Food service dá a maior parte do lucro.',
+ 'market-margem':'Café 75–85% · pão de queijo 70–85% · água gelada e gelo 60–75%. Cigarro só 4–10%.',
+ 'market-custo-beneficio':'1º combo café + pão de queijo · 2º água · 3º energético e isotônico · 4º picolé.',
+ 'market-validade':'Risco: vende pouco e estraga rápido (sanduíche natural, salada de frutas). Base: água, balas, picolé.',
+ 'market-publicos':'Geral: kit represa · Elétrico: combo Recarga + café · Pais: kit criança + fliperama.',
+ 'market-fliperama':'R$ 2,8–6,5 mil · ficha R$ 2 ou R$ 5 por 10 min · Pix na máquina · retorno em ~3–4 meses (ilustrativo).',
  'fontes':'Senatran, Detran-SP, ABVE, Webmotors, Locomotiva, Deloitte, McKinsey, DataReportal e outras.'
 };
 function tipHTML(id){
