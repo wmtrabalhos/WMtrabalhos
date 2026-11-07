@@ -16,6 +16,7 @@
 | [plano-conteudo-hienergy.md](./plano-conteudo-hienergy.md) | Pilares, ajustes no perfil, 10 roteiros de reels, 4 carrosséis e calendário de 4 semanas |
 | [pesquisa-raio-recarga-rifaina.md](./pesquisa-raio-recarga-rifaina.md) | Raio útil dos elétricos e probabilidade de parar em Rifaina por rota (SP ↔ MG) |
 | `modelo-raio-recarga.py` | Simulação usada no estudo (rodar com python3 + numpy) |
+| [pesquisa-conveniencia-mix.md](./pesquisa-conveniencia-mix.md) | Mix do Market: mais vendidos, margem, custo-benefício, validade, públicos e fliperama |
 | [vault-pesquisa.html](./vault-pesquisa.html) | Cofre de pesquisa interativo (estilo Obsidian): mapa, frota por cidade, comprador e estratégia |
 | `dados/` | Frota elétrica por cidade (Senatran e Detran-SP) |
 | `chatgpt/` | Master prompt e passo a passo do projeto "HI Energy · Carrosséis" no ChatGPT |
