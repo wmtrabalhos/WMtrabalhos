@@ -20,7 +20,7 @@
 | [vault-pesquisa.html](./vault-pesquisa.html) | Cofre de pesquisa interativo (estilo Obsidian): mapa, frota por cidade, comprador e estratégia |
 | `dados/` | Frota elétrica por cidade (Senatran e Detran-SP) |
 | `chatgpt/` | Master prompt e passo a passo do projeto "HI Energy · Carrosséis" no ChatGPT |
-| `roteiros/` | Roteiros e carrosséis detalhados, um por arquivo, conforme forem produzidos |
+| `carrosseis/` | Carrosséis prontos para produção (lote 01: C5 a C9) |
 
 ## Dados para confirmar com a HI Energy antes de publicar
 Os roteiros têm campos entre colchetes, como **[R$/kWh]**, que dependem destas respostas:
