@@ -1,0 +1,584 @@
+<title>Relatório RIZEI · HI Energy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: segundo cérebro estilo Obsidian. Identidade HI Energy (cliente) com assinatura RIZEI (laranja). Tema escuro fixo. */
+/* Layout: cofre estilo Obsidian. Faixa de ícones | explorador de notas | nota aberta | grafo local e links. Identidade HI Energy, tema escuro fixo. */
+:root{
+  --bg:#050B1A; --panel:#0A1428; --panel2:#0C1730; --line:#1E2B47; --line2:#2A3A5C;
+  --fg:#E8F1EC; --soft:#B7C3CE; --muted:#8A97AB; --accent:#A9CF4A; --accent-ink:#0B1404;
+  --river:#4F8CC0; --warn:#E3A44A; --sp:#A9CF4A; --mg:#7FB2E5; --other:#C7A4F0;
+  --display:'Montserrat',Arial,sans-serif; --body:'Inter',Arial,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.55;overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:50;background:var(--panel)}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app{display:grid;grid-template-columns:52px 270px minmax(0,1fr) 320px;grid-template-rows:minmax(0,1fr);height:100%;height:100dvh;padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+/* ribbon */
+.ribbon{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;padding-block:12px}
+.logo{width:34px;height:34px;margin-bottom:10px}
+.rbtn{width:36px;height:36px;border-radius:8px;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted)}
+.rbtn:hover,.rbtn[aria-pressed="true"]{background:var(--panel2);color:var(--accent)}
+.rbtn svg{width:19px;height:19px}
+/* sidebar */
+.side{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0}
+.side-head{padding:14px 14px 10px;border-bottom:1px solid var(--line)}
+.vault-name{font-family:var(--display);font-weight:800;font-size:15px;letter-spacing:.2px;display:flex;align-items:center;gap:8px}
+.vault-name small{font-family:var(--mono);font-weight:400;font-size:11px;color:var(--muted)}
+.search{margin-top:10px;width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:7px 10px;color:var(--fg);font-size:13px}
+.search::placeholder{color:var(--muted)}
+.tree{overflow:auto;padding:8px 6px 24px;flex:1;min-height:0}
+.folder>button{width:100%;display:flex;align-items:center;gap:6px;background:none;border:0;padding:5px 8px;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;color:var(--soft);text-align:left}
+.folder>button:hover{background:var(--panel2)}
+.folder>button .chev{transition:transform .15s;width:10px;color:var(--muted)}
+.folder.closed>button .chev{transform:rotate(-90deg)}
+.folder.closed .files{display:none}
+.files{padding-left:14px;border-left:1px solid var(--line);margin-left:13px}
+.file{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 8px;border-radius:5px;cursor:pointer;font-size:13px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file:hover{background:var(--panel2);color:var(--fg)}
+.file.active{background:rgba(169,207,74,.14);color:var(--accent)}
+.file mark{background:rgba(169,207,74,.35);color:var(--fg);border-radius:2px}
+.side-foot{border-top:1px solid var(--line);padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+/* main */
+.main{display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;background:var(--bg)}
+.tabs{display:flex;align-items:flex-end;gap:2px;background:var(--panel);border-bottom:1px solid var(--line);padding:6px 8px 0;overflow-x:auto;min-height:40px;padding-top:max(6px,env(safe-area-inset-top,0px))}
+.tab{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid transparent;border-bottom:0;border-radius:7px 7px 0 0;padding:6px 10px;font-size:12.5px;color:var(--muted);cursor:pointer;white-space:nowrap;max-width:200px}
+.tab span{overflow:hidden;text-overflow:ellipsis}
+.tab.active{background:var(--bg);border-color:var(--line);color:var(--fg)}
+.tab .x{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 2px;font-size:14px;line-height:1}
+.tab .x:hover{color:var(--fg)}
+.mobile-bar{display:none}
+.scroll{overflow-y:auto;overflow-x:hidden;flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.note{max-width:860px;margin:0 auto;padding:28px max(16px,env(safe-area-inset-right,0px)) 80px max(16px,env(safe-area-inset-left,0px))}
+.crumb{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.crumb b{color:var(--soft);font-weight:400}
+.note h1{font-family:var(--display);font-weight:800;font-size:clamp(26px,3.4vw,36px);line-height:1.15;margin:10px 0 14px;text-wrap:balance}
+.note h2{font-family:var(--display);font-weight:700;font-size:20px;margin:30px 0 10px;text-wrap:balance}
+.note h3{font-family:var(--display);font-weight:700;font-size:16px;margin:22px 0 8px}
+.note p,.note li{color:var(--soft)}
+.note p{margin:0 0 12px;max-width:68ch}
+.note ul,.note ol{margin:0 0 14px;padding-left:22px}
+.note li{margin:4px 0}
+.note strong{color:var(--fg)}
+.wl{color:var(--accent);text-decoration:none;cursor:pointer;border-bottom:1px solid rgba(169,207,74,.35)}
+.wl:hover{border-bottom-color:var(--accent);background:rgba(169,207,74,.08)}
+.ext{color:#9CC6EE;text-decoration:none;border-bottom:1px dotted rgba(156,198,238,.5)}
+.ext:hover{border-bottom-style:solid}
+.tag{display:inline-block;font-family:var(--mono);font-size:11.5px;color:var(--accent);background:rgba(169,207,74,.1);border:1px solid rgba(169,207,74,.25);border-radius:999px;padding:1px 9px;margin:0 4px 4px 0;cursor:pointer}
+.props{border:1px solid var(--line);border-radius:8px;margin:6px 0 20px;overflow:hidden}
+.props div{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:7px 12px;border-top:1px solid var(--line);font-size:13px}
+.props div:first-child{border-top:0}
+.props dt{font-family:var(--mono);color:var(--muted);font-size:12px}
+.props dd{margin:0;color:var(--fg);min-width:0}
+.callout{border:1px solid var(--line2);border-left:3px solid var(--accent);background:var(--panel);border-radius:6px;padding:12px 14px;margin:14px 0}
+.callout.warn{border-left-color:var(--warn)}
+.callout.info{border-left-color:var(--mg)}
+.callout .ct{font-family:var(--display);font-weight:700;font-size:13px;margin-bottom:4px;color:var(--fg)}
+.callout p:last-child{margin-bottom:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 20px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;min-width:0}
+.stat .n{font-family:var(--display);font-weight:800;font-size:26px;color:var(--accent);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .l{font-size:12.5px;color:var(--soft);margin-top:4px}
+.tbl{overflow-x:auto;margin:10px 0 18px;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-top:1px solid var(--line);text-align:left;white-space:nowrap}
+thead th{border-top:0;background:var(--panel);font-family:var(--mono);font-weight:600;font-size:11.5px;color:var(--muted);cursor:pointer;user-select:none}
+thead th[data-sort]:hover{color:var(--fg)}
+td.r,th.r{text-align:right}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+.uf{font-family:var(--mono);font-size:11px;border-radius:4px;padding:1px 5px}
+.uf.SP{color:var(--sp);background:rgba(169,207,74,.12)}
+.uf.MG{color:var(--mg);background:rgba(127,178,229,.12)}
+.bars{display:flex;flex-direction:column;gap:7px;margin:12px 0 18px}
+.bar{display:grid;grid-template-columns:150px minmax(0,1fr) 64px;gap:10px;align-items:center;font-size:13px}
+.bar .lbl{color:var(--soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .trk{height:16px;background:var(--panel);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--accent);border-radius:4px}
+.bar .fill.mg{background:var(--mg)}
+.bar .fill.mute{background:var(--line2)}
+.bar .v{font-family:var(--mono);font-size:12px;text-align:right;color:var(--fg)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 12px}
+.chip{border:1px solid var(--line2);background:var(--panel);color:var(--soft);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer}
+.chip[aria-pressed="true"]{background:rgba(169,207,74,.15);border-color:rgba(169,207,74,.5);color:var(--accent)}
+.mapwrap{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;margin:8px 0 14px}
+.mapwrap svg{display:block;width:100%;height:auto;max-height:78vh}
+.mapwrap .city{cursor:pointer}
+.mapwrap .city:hover circle.dot,.mapwrap .city:focus circle.dot{stroke:var(--fg);stroke-width:3}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin:4px 2px 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:5px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0 18px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.card h3{margin:0 0 6px}
+.card p{margin:0 0 6px;font-size:13.5px}
+.src{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.big-graph{background:var(--panel);border:1px solid var(--line);border-radius:10px;height:70vh;min-height:420px;position:relative;overflow:hidden}
+.big-graph canvas{width:100%;height:100%;display:block}
+/* right pane */
+.right{background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;min-width:0;min-height:0;overflow:auto}
+.rsec{border-bottom:1px solid var(--line);padding:12px 14px}
+.rsec h4{margin:0 0 8px;font-family:var(--mono);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);display:flex;justify-content:space-between}
+.local{height:240px;background:var(--bg);border:1px solid var(--line);border-radius:8px;position:relative}
+.local canvas{width:100%;height:100%;display:block}
+.linklist{display:flex;flex-direction:column;gap:2px}
+.linklist button{text-align:left;background:none;border:0;padding:4px 6px;border-radius:5px;font-size:13px;color:var(--soft);cursor:pointer}
+.linklist button:hover{background:var(--panel2);color:var(--accent)}
+.empty{font-size:12.5px;color:var(--muted)}
+.outline a{display:block;font-size:12.5px;color:var(--soft);text-decoration:none;padding:3px 6px;border-radius:4px}
+.outline a:hover{background:var(--panel2);color:var(--fg)}
+.scrim{display:none}
+.tip{position:fixed;z-index:60;pointer-events:none;max-width:300px;background:#0C1730;border:1px solid var(--line2);border-radius:10px;padding:12px 14px;box-shadow:0 12px 32px rgba(0,0,0,.45);font-size:12.5px;color:var(--soft);opacity:0;transform:translateY(4px);transition:opacity .06s,transform .06s}
+.tip.on{opacity:1;transform:none}
+.tip .tt{font-family:var(--display);font-weight:800;font-size:14px;color:var(--fg);margin-bottom:2px}
+.tip .tf{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.tip .tg{display:grid;grid-template-columns:1fr auto;gap:3px 14px;font-variant-numeric:tabular-nums}
+.tip .tg b{color:var(--fg);font-weight:600;text-align:right}
+.tip .tk{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--fg)}
+.tip .th{margin-top:6px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+@media (max-width:1180px){.app{grid-template-columns:52px 250px minmax(0,1fr)}.right{display:none}.note .right-inline{display:block}}
+@media (min-width:1181px){.right-inline{display:none}}
+@media (max-width:760px){
+  html,body{height:auto;overflow:auto}
+  .app{grid-template-columns:minmax(0,1fr);height:auto;min-height:100dvh}
+  .main{overflow:visible}
+  .scroll{overflow:visible}
+  .ribbon{display:none}
+  .side{position:fixed;inset:0 auto 0 0;width:min(86vw,320px);z-index:40;transform:translateX(-100%);transition:transform .2s;padding-top:env(safe-area-inset-top,0px);padding-left:env(safe-area-inset-left,0px)}
+  .app.drawer .side{transform:none}
+  .app.drawer .scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:30}
+  .mobile-bar{display:flex;align-items:center;gap:10px;background:var(--panel);border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-top:max(8px,env(safe-area-inset-top,0px))}
+  .mobile-bar button{border:1px solid var(--line2);background:var(--bg);border-radius:6px;padding:6px 10px;font-size:13px}
+  .mobile-bar b{font-family:var(--display);font-size:14px}
+  .tabs{display:none}
+  .bar{grid-template-columns:96px minmax(0,1fr) 54px}
+  .props div{grid-template-columns:110px 1fr}
+}
+.right-inline{border-top:1px solid var(--line);margin-top:36px;padding-top:16px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+:root{--rizei:#FF8A3D;--rizei-soft:rgba(255,138,61,.14)}
+.brandbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:linear-gradient(90deg,var(--panel) 0%,#14121A 100%);border-bottom:1px solid var(--line);padding-block:8px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));font-size:12.5px;color:var(--soft)}
+.brandbar .rz{display:flex;align-items:center;gap:8px;font-family:var(--display);font-weight:800;letter-spacing:3px;color:var(--fg)}
+.brandbar .x{color:var(--muted);font-family:var(--mono)}
+.brandbar .he{font-family:var(--display);font-weight:800;color:var(--accent)}
+.brandbar .sp{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}
+.rzmark{width:22px;height:22px}
+.vault-name .by{display:block;font-family:var(--mono);font-weight:400;font-size:11px;color:var(--rizei);letter-spacing:1px;margin-top:2px}
+.lead{font-size:16px;color:var(--fg)!important}
+.stat{cursor:default}.stat .d{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:6px}
+.chartbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0 6px;overflow-x:auto}
+.chart{display:block;width:100%;min-width:420px;height:auto}
+.chart .pt{cursor:pointer}.chart .pt:hover circle:last-child{stroke:#E8F1EC;stroke-width:2}
+.bar[data-tip]{cursor:default}
+.sig{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--muted)}
+.sig b{font-family:var(--display);letter-spacing:3px;color:var(--fg)}
+.file.active{background:var(--rizei-soft);color:var(--rizei)}
+
+</style>
+<div class="app" id="app">
+  <nav class="ribbon" aria-label="Atalhos">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#0C1730"/><path d="M14 46 L28 18 L36 18 L22 46 Z" fill="#E8F1EC"/><path d="M26 46 L34 34 L44 34 L36 46 Z" fill="#E8F1EC"/><path d="M40 26 L44 18 L54 18 L50 26 Z" fill="#A9CF4A"/></svg>
+    <button class="rbtn" data-go="inicio" title="Resumo" aria-label="Resumo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button class="rbtn" data-go="seguidores" title="Seguidores" aria-label="Seguidores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg></button>
+    <button class="rbtn" data-go="ranking" title="Ranking" aria-label="Ranking de publicações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></button>
+    <button class="rbtn" data-go="grafo" title="Mapa do relatório" aria-label="Mapa do relatório"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="7" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 7l10 0.5M6.5 8l4.5 8M17.5 9l-4.5 7"/></svg></button>
+    <button class="rbtn" data-go="proximos-passos" title="Próximos passos" aria-label="Próximos passos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <button class="rbtn" data-go="sobre-rizei" title="RIZEI" aria-label="Sobre a RIZEI" style="margin-top:auto"><svg class="rzmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#FF8A3D"/><path d="M8 22 L14 15 L18 19 L24 10" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10 H24 V15" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+  </nav>
+  <aside class="side" id="side" aria-label="Explorador de notas">
+    <div class="side-head">
+      <div class="vault-name">Relatório HI Energy <small>semana 1</small></div>
+      <div class="vault-name"><span class="by">por RIZEI · 13/11/2026</span></div>
+      <input class="search" id="q" type="search" placeholder="Buscar no relatório…" aria-label="Buscar no relatório">
+    </div>
+    <div class="tree" id="tree"></div>
+    <div class="side-foot" id="count"></div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+  <div class="tip" id="tip" role="tooltip"></div>
+  <main class="main">
+    <div class="brandbar"><span class="rz"><svg class="rzmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#FF8A3D"/><path d="M8 22 L14 15 L18 19 L24 10" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10 H24 V15" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>RIZEI</span><span class="x">×</span><span class="he">HI ENERGY</span><span>Relatório de Instagram · 06 a 12/11/2026</span><span class="sp">@hienergy.rifaina</span></div>
+    <div class="mobile-bar"><button id="menu" aria-label="Abrir notas">☰ Notas</button><b id="mtitle">Relatório</b></div>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <div class="scroll" id="scroll"><article class="note" id="note"></article></div>
+  </main>
+  <aside class="right" aria-label="Grafo local e links">
+    <div class="rsec"><h4>Grafo local <span id="lcount"></span></h4><div class="local"><canvas id="lg"></canvas></div></div>
+    <div class="rsec"><h4>Links de saída</h4><div class="linklist" id="out"></div></div>
+    <div class="rsec"><h4>Backlinks</h4><div class="linklist" id="back"></div></div>
+    <div class="rsec"><h4>Nesta nota</h4><div class="outline" id="outline"></div></div>
+  </aside>
+</div>
+<script>
+const RZ='<svg class="rzmark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#FF8A3D"/><path d="M8 22 L14 15 L18 19 L24 10" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 10 H24 V15" fill="none" stroke="#14121A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+/* ============ DADOS DO RELATÓRIO ============ */
+// Fonte: painel profissional do Instagram de @hienergy.rifaina, capturas de 13/11/2026 (filtros 7 e 30 dias).
+const fmt=n=>n==null?'—':n.toLocaleString('pt-BR');
+const L=(id,t)=>`[[${id}|${t}]]`;
+const X=(u,t)=>`<a class="ext" href="${u}" target="_blank" rel="noopener">${t}</a>`;
+const NOTES=[];const add=o=>NOTES.push(o);
+const tipAttr=h=>`data-tip="${h.replace(/"/g,'&quot;')}"`;
+
+// Seguidores (valores aproximados lidos dos gráficos de 7 e 30 dias)
+const FOL=[['14/10',50],['18/10',50],['22/10',50],['24/10',51],['26/10',53],['28/10',53],['30/10',57],['01/11',57],['02/11',62],['04/11',68],['05/11',72],['06/11',75],['07/11',80],['08/11',85],['09/11',89],['10/11',89],['11/11',91],['12/11',92]];
+// Visualizações por dia na semana (aprox. do gráfico; soma ≈ 6.125)
+const VIEWS=[['06/11',60],['07/11',820],['08/11',3100],['09/11',1350],['10/11',450],['11/11',250],['12/11',95]];
+const POSTS=[
+ {t:'Imagens reais da câmera do nosso…',f:'Reel',v:3000,a:2300,c:44,m:4,r:12,s:10,d:'4 d',k:'viagem'},
+ {t:'630 km de Brasília a Rifaina · “Chegamos com 3%”',f:'Reel',v:1900,a:1500,c:46,m:8,r:7,s:13,d:'5 d',k:'viagem'},
+ {t:'Carro elétrico por R$ 9.900?',f:'Carrossel',v:279,a:204,c:12,m:0,r:3,s:7,d:'2 d',k:'edu'},
+ {t:'Você sabe quanto custa “encher”… (6 verdades)',f:'Carrossel',v:220,a:106,c:18,m:0,r:8,s:3,d:'5 d',k:'edu'},
+ {t:'Vídeo sem legenda',f:'Reel/story',v:214,a:158,c:6,m:0,r:0,s:1,d:'4 d',k:'outro'},
+ {t:'A bateria do carro elétrico vira lixo?',f:'Carrossel',v:184,a:142,c:14,m:1,r:7,s:4,d:'1 d',k:'edu'}
+];
+POSTS.forEach(p=>{p.int=p.c+p.m+p.r+p.s;p.tx=100*p.int/p.v});
+const PRE=[['Post de 01/11',48],['Post de 04/11',39],['“Todo mundo sabe que carro el…” (04/11)',211]];
+
+function lineChart(data,{w=640,h=240,color='#A9CF4A',mark=null,unit=''}={}){
+  const pad={l:38,r:14,t:16,b:30};const max=Math.max(...data.map(d=>d[1]));const min=Math.min(0,...data.map(d=>d[1]));
+  const X=i=>pad.l+i*(w-pad.l-pad.r)/(data.length-1),Y=v=>h-pad.b-(v-min)/(max-min||1)*(h-pad.t-pad.b);
+  const pts=data.map((d,i)=>`${X(i).toFixed(1)},${Y(d[1]).toFixed(1)}`).join(' ');
+  const ticks=[min,Math.round((min+max)/2),max];
+  let s=`<svg viewBox="0 0 ${w} ${h}" class="chart" role="img" aria-label="Gráfico de linha">`;
+  ticks.forEach(t=>{s+=`<line x1="${pad.l}" x2="${w-pad.r}" y1="${Y(t)}" y2="${Y(t)}" stroke="#1E2B47"/><text x="${pad.l-6}" y="${Y(t)+4}" text-anchor="end" fill="#8A97AB" font-size="11" font-family="JetBrains Mono,monospace">${fmt(t)}</text>`});
+  if(mark!=null){const mx=X(mark);s+=`<rect x="${mx}" y="${pad.t}" width="${w-pad.r-mx}" height="${h-pad.t-pad.b}" fill="#FF8A3D" fill-opacity=".08"/><text x="${mx+6}" y="${pad.t+12}" fill="#FF8A3D" font-size="11" font-family="JetBrains Mono,monospace">RIZEI</text><line x1="${mx}" x2="${mx}" y1="${pad.t}" y2="${h-pad.b}" stroke="#FF8A3D" stroke-dasharray="4 4"/>`}
+  s+=`<polygon points="${X(0)},${h-pad.b} ${pts} ${X(data.length-1)},${h-pad.b}" fill="${color}" fill-opacity=".12"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  data.forEach((d,i)=>{const lab=i===0||i===data.length-1||i===Math.floor(data.length/2);if(lab)s+=`<text x="${X(i)}" y="${h-10}" text-anchor="middle" fill="#8A97AB" font-size="11" font-family="JetBrains Mono,monospace">${d[0]}</text>`;
+   s+=`<g class="pt" ${tipAttr(`<div class='tt'>${d[0]}</div><div class='tg'><span>Valor</span><b>${fmt(d[1])}${unit}</b></div>`)}><circle cx="${X(i)}" cy="${Y(d[1])}" r="12" fill="transparent"/><circle cx="${X(i)}" cy="${Y(d[1])}" r="${i===data.length-1?5:3.5}" fill="${color}"/></g>`});
+  return s+`</svg>`;
+}
+const bar=(lbl,v,max,txt,cl='',tip='')=>`<div class="bar" ${tip?tipAttr(tip):''}><span class="lbl" title="${lbl}">${lbl}</span><span class="trk"><span class="fill ${cl}" style="width:${Math.max(1,100*v/max)}%;display:block"></span></span><span class="v">${txt}</span></div>`;
+const kpi=(n,l,d,tip)=>`<div class="stat" ${tipAttr(tip)}><div class="n">${n}</div><div class="l">${l}</div>${d?`<div class="d">${d}</div>`:''}</div>`;
+
+/* ---- 00 Painel ---- */
+add({id:'inicio',folder:'00 Painel',title:'Semana 1: resumo para o Henrique',tags:['resumo'],props:{Perfil:'@hienergy.rifaina',Período:'06/11 a 12/11/2026 (7 dias de trabalho)',Comparação:'Semana anterior e últimos 30 dias',Preparado:'RIZEI · Inteligência de mercado'},body:()=>`
+<p class="lead">Henrique, este é o primeiro relatório do trabalho da RIZEI no Instagram da HI Energy. Cada nota abre um ponto da análise. No computador, passe o mouse nos números e nos gráficos para ver o detalhe e use o grafo à direita para navegar. No celular, toque em ☰ Notas para abrir os tópicos.</p>
+<div class="stats">
+${kpi('+146%','pessoas alcançadas na semana (3.684)','2,5x a semana anterior','<div class=\'tt\'>Alcance</div><div class=\'tg\'><span>Semana anterior</span><b>~1.497</b><span>Semana RIZEI</span><b>3.684</b></div><div class=\'tk\'>O conteúdo chegou a muita gente nova.</div>')}
+${kpi('+24,3%','seguidores em 7 dias (75 → 92)','~2x o ritmo anterior','<div class=\'tt\'>Seguidores</div><div class=\'tg\'><span>Antes</span><b>~1,1 por dia</b><span>Com a RIZEI</span><b>~2,4 por dia</b></div>')}
+${kpi('3,4x','mais interações por dia','249 em 7 dias','<div class=\'tt\'>Interações</div><div class=\'tg\'><span>Antes</span><b>~10,6 por dia</b><span>Com a RIZEI</span><b>~35,6 por dia</b></div>')}
+${kpi('10–15x','mais visualizações nos Reels','3 mil e 1,9 mil contra 39–211 antes','<div class=\'tt\'>Reels</div><div class=\'tk\'>Os posts antes da RIZEI tinham de 39 a 211 visualizações.</div>')}
+</div>
+<h2>Em uma frase</h2>
+<p>Em 7 dias, o perfil passou a <strong>alcançar 2,5 vezes mais pessoas</strong>, <strong>ganhar seguidores 2 vezes mais rápido</strong> e <strong>gerar 3,4 vezes mais interações</strong>. O próximo passo é transformar esse alcance em <strong>carro parado no posto</strong>.</p>
+<h2>Por onde ler</h2>
+<div class="grid2">
+ <div class="card"><h3>${L('seguidores','Seguidores')}</h3><p>De 50 para 92 em 30 dias, com aceleração na semana da RIZEI.</p></div>
+ <div class="card"><h3>${L('alcance','Alcance e visualizações')}</h3><p>6.125 visualizações, 90% em Reels, a maioria de quem ainda não segue o perfil.</p></div>
+ <div class="card"><h3>${L('ranking','O que funcionou')}</h3><p>Ranking das publicações da semana, com a taxa de interação de cada uma.</p></div>
+ <div class="card"><h3>${L('proximos-passos','Próximos passos')}</h3><p>Metas e ações para as semanas 2 a 4.</p></div>
+</div>
+<div class="callout"><div class="ct">Como ler os percentuais</div><p>Os percentuais "+X%" são do próprio Instagram, comparando com o período anterior. Com uma base pequena, os percentuais ficam grandes. Por isso o relatório também mostra os números absolutos e o ${L('leitura-honesta','que ainda não dá para afirmar')}.</p></div>`});
+
+add({id:'grafo',folder:'00 Painel',title:'Mapa do relatório',tags:['navegação'],props:{Dica:'Passe o mouse num ponto para ver o dado principal. Clique para abrir.'},body:()=>`
+<p>Cada ponto é uma nota do relatório, e as linhas mostram como os temas se ligam.</p>
+<div class="big-graph"><canvas id="bg"></canvas></div><div class="legend" id="glegend"></div>
+<p>Volte ao ${L('inicio','resumo')}.</p>`});
+
+/* ---- 01 Resultados ---- */
+add({id:'seguidores',folder:'01 Resultados',title:'Seguidores',tags:['seguidores','crescimento'],props:{'7 dias':'75 → 92 (+24,3%)','30 dias':'50 → 92 (+84%)','Ritmo':'~1,1 por dia antes → ~2,4 por dia com a RIZEI'},body:()=>`
+<h2>Curva de 30 dias</h2>
+<div class="chartbox">${lineChart(FOL,{mark:11})}</div>
+<p class="src">Valores aproximados lidos do gráfico do Instagram. A faixa laranja marca a semana da RIZEI. Passe o mouse nos pontos.</p>
+<h2>O que mostra</h2>
+<ul>
+<li>Do total ganho no mês (+42), <strong>~17 vieram nos 7 dias da RIZEI</strong>: 40% do crescimento em 23% do tempo.</li>
+<li>A maior subida foi entre 06 e 09/11, junto com os dois Reels de viagem (${L('reels-viagem','ver Reels')}). Depois o ritmo diminuiu, acompanhando a queda de ${L('alcance','visualizações')}.</li>
+<li><strong>Faltam 8 seguidores para chegar a 100</strong>. A partir daí, o Instagram libera os dados de ${L('publico','gênero e idade')}.</li>
+</ul>`});
+
+add({id:'alcance',folder:'01 Resultados',title:'Alcance e visualizações',tags:['alcance','reels'],props:{Visualizações:'6.125 (+32,3%)','Contas alcançadas':'3.684 (+146,1%)','Terceiro indicador':'1.825 (+39,5%) · nome cortado na captura'},body:()=>`
+<div class="stats">
+${kpi('6.125','visualizações','+32,3% · antes ~4.630','<div class=\'tt\'>Visualizações</div><div class=\'tk\'>Quantas vezes o conteúdo foi visto.</div>')}
+${kpi('3.684','contas alcançadas','+146,1% · antes ~1.497','<div class=\'tt\'>Visualizadores</div><div class=\'tk\'>Pessoas diferentes que viram. É o principal sinal de crescimento.</div>')}
+</div>
+<h2>Visualizações por dia</h2>
+<div class="chartbox">${lineChart(VIEWS,{color:'#A9CF4A'})}</div>
+<p class="src">Aproximado do gráfico do Instagram (a soma bate com 6.125).</p>
+<h2>Por tipo de conteúdo</h2>
+<div class="bars">
+${bar('Reels',5500,5500,'5,5 mil','', "<div class='tt'>Reels</div><div class='tk'>~90% das visualizações. A maior parte veio de quem ainda não segue o perfil.</div>")}
+${bar('Posts e carrosséis',397,5500,'397')}
+${bar('Stories',214,5500,'214','mute')}
+</div>
+<h2>O que mostra</h2>
+<ul>
+<li>O alcance cresceu <strong>muito mais</strong> que as visualizações (+146% contra +32%): o conteúdo chegou a <strong>gente nova</strong>.</li>
+<li>O pico de ~3,1 mil no dia 08/11 veio do ${L('reels-viagem','Reel da câmera do carro')}. A queda até o dia 12 mostra que é preciso ${L('constancia','constância')}.</li>
+</ul>`});
+
+add({id:'interacoes',folder:'01 Resultados',title:'Interações',tags:['engajamento'],props:{'30 dias':'492','7 dias':'249 (50,6% do mês)','Ritmo':'~10,6 por dia → ~35,6 por dia (3,4x)'},body:()=>`
+<div class="tbl"><table><thead><tr><th>Tipo</th><th class="r">30 dias</th><th class="r">7 dias (RIZEI)</th><th class="r">% do mês na semana</th></tr></thead><tbody>
+<tr><td>Reels</td><td class="r">204</td><td class="r">201</td><td class="r"><b>98,5%</b></td></tr>
+<tr><td>Posts</td><td class="r">194</td><td class="r">40</td><td class="r">20,6%</td></tr>
+<tr><td>Stories</td><td class="r">94</td><td class="r">8</td><td class="r">8,5%</td></tr>
+<tr><td><b>Total</b></td><td class="r"><b>492</b></td><td class="r"><b>249</b></td><td class="r"><b>50,6%</b></td></tr>
+</tbody></table></div>
+<ul>
+<li><strong>Metade das interações do mês aconteceu em 7 dias</strong>, que equivalem a 23% do período.</li>
+<li><strong>Reels:</strong> quase todo o engajamento em Reels do mês veio nesta semana. Antes, os Reels não geravam interação.</li>
+<li><strong>Posts:</strong> a maior parte das 194 interações veio de posts antigos.</li>
+<li><strong>Stories:</strong> foram de 86 para 8 interações. É a frente que precisa voltar (${L('pontos-atencao','ver atenção')}).</li>
+</ul>`});
+
+add({id:'atividade-perfil',folder:'01 Resultados',title:'Visitas, link e endereço',tags:['conversão'],props:{'Visitas ao perfil':'81 em 7 dias (+32% por dia)','Toques no link da bio':'0','Toques no endereço':'0'},body:()=>`
+<div class="stats">
+${kpi('81','visitas ao perfil em 7 dias','~11,6 por dia · antes ~8,8','<div class=\'tt\'>Visitas</div><div class=\'tg\'><span>30 dias</span><b>283</b><span>7 dias</span><b>81</b></div>')}
+${kpi('0','toques no link da bio','também 0 em 30 dias','<div class=\'tt\'>Link da bio</div><div class=\'tk\'>O perfil não oferece caminho até o posto.</div>')}
+${kpi('0','toques no endereço','também 0 em 30 dias','<div class=\'tt\'>Endereço</div><div class=\'tk\'>O botão de endereço da conta comercial precisa ser ativado.</div>')}
+</div>
+<div class="callout warn"><div class="ct">O ponto mais importante a corrigir</div><p>As pessoas visitam o perfil, mas <strong>não encontram como chegar ao posto</strong>. Correção imediata: colocar o link do WhatsApp ou do Google Maps na bio e ativar o endereço comercial (${L('proximos-passos','próximos passos')}).</p></div>`});
+
+add({id:'publico',folder:'01 Resultados',title:'Público (gênero e idade)',tags:['público'],props:{Status:'Bloqueado até 100 seguidores',Faltam:'8 seguidores'},body:()=>`
+<p>Os campos de gênero e faixa etária aparecem vazios porque o Instagram só mostra dados de público a partir de <strong>100 seguidores</strong>. Ao passar disso, a RIZEI vai conferir se o público real bate com o perfil da pesquisa: <strong>35–45 anos, classes A/B, donos de elétrico de Ribeirão, Franca, Araxá e Uberaba</strong>.</p>`});
+
+/* ---- 02 Conteúdo ---- */
+add({id:'ranking',folder:'02 Conteúdo',title:'Ranking das publicações',tags:['conteúdo','ranking'],props:{Período:'Últimos 7 dias','Taxa de interação':'(curtidas + comentários + reposts + envios) ÷ visualizações'},body:()=>`
+<h2>Visualizações</h2>
+<div class="bars">${[...POSTS].sort((a,b)=>b.v-a.v).map(p=>bar(p.t,p.v,3000,fmt(p.v),p.k==='edu'?'mg':(p.k==='outro'?'mute':''),`<div class='tt'>${p.t}</div><div class='tf'>${p.f} · há ${p.d}</div><div class='tg'><span>Visualizações</span><b>${fmt(p.v)}</b><span>Alcance</span><b>${fmt(p.a)}</b><span>Curtidas</span><b>${p.c}</b><span>Comentários</span><b>${p.m}</b><span>Reposts</span><b>${p.r}</b><span>Envios</span><b>${p.s}</b><span>Taxa de interação</span><b>${p.tx.toFixed(1).replace('.',',')}%</b></div>`)).join('')}</div>
+<h2>Taxa de interação</h2>
+<div class="bars">${[...POSTS].sort((a,b)=>b.tx-a.tx).map(p=>bar(p.t,p.tx,15,p.tx.toFixed(1).replace('.',',')+'%',p.k==='edu'?'mg':(p.k==='outro'?'mute':''))).join('')}</div>
+<div class="legend"><span><i style="background:var(--accent)"></i>Reel de viagem</span><span><i style="background:var(--mg)"></i>Carrossel educativo</span><span><i style="background:var(--line2)"></i>Outro</span></div>
+<p>Os ${L('reels-viagem','Reels de viagem')} trazem <strong>alcance</strong>. Os ${L('carrosseis','carrosséis')} trazem <strong>interação</strong>. Comparação com antes em ${L('antes-depois','antes x depois')}.</p>`});
+
+add({id:'reels-viagem',folder:'02 Conteúdo',title:'Reels de viagem real',tags:['reels','formato'],props:{Resultado:'3 mil e 1,9 mil visualizações','Formato da pesquisa':'Viagem real, bateria no limite, prova real'},body:()=>`
+<ul>
+<li><strong>“Imagens reais da câmera do nosso…”:</strong> 3 mil visualizações, 2,3 mil pessoas, 10 envios e 12 reposts.</li>
+<li><strong>“630 km de Brasília a Rifaina · Chegamos com 3%”:</strong> 1,9 mil visualizações, 8 comentários e 13 envios, a maior taxa entre os Reels (3,9%).</li>
+</ul>
+<p>Os dois seguem exatamente os formatos que a ${L('metodo','pesquisa da RIZEI')} apontou como os que mais viralizam no nicho de carro elétrico: <strong>viagem real</strong> e <strong>"cheguei com X%"</strong>. Por isso o resultado vem do método, e não de sorte.</p>`});
+
+add({id:'carrosseis',folder:'02 Conteúdo',title:'Carrosséis educativos',tags:['carrossel','formato'],props:{'Taxa de interação':'7,9% a 14,1%',Destaque:'Muitos reposts e envios'},body:()=>`
+<ul>
+<li><strong>Bateria vira lixo?</strong> 14,1% em 1 dia, com 7 reposts.</li>
+<li><strong>6 verdades / quanto custa encher:</strong> 13,2%, com 8 reposts.</li>
+<li><strong>Carro elétrico por R$ 9.900?</strong> 7,9%, com 7 envios, mas <strong>0 comentários</strong>, apesar do pedido "Comenta SIM ou NÃO".</li>
+</ul>
+<p>Os carrosséis alcançam menos gente que os Reels, mas são <strong>salvos e repassados</strong>. É assim que o perfil constrói autoridade. Ajuste para os próximos: em vez de pedir comentário genérico, pedir uma palavra-chave e responder rápido nos comentários (${L('pontos-atencao','ver atenção')}).</p>`});
+
+add({id:'antes-depois',folder:'02 Conteúdo',title:'Antes x depois da RIZEI',tags:['comparação'],props:{Antes:'39 a 211 visualizações por post',Depois:'184 a 3 mil por publicação'},body:()=>`
+<div class="bars">
+${PRE.map(([t,v])=>bar('Antes: '+t,v,3000,fmt(v),'mute')).join('')}
+${POSTS.slice(0,2).map(p=>bar('RIZEI: '+p.t,p.v,3000,fmt(p.v))).join('')}
+</div>
+<p>Os Reels da semana fizeram <strong>de 10 a 15 vezes mais visualizações</strong> do que os posts anteriores. Até o carrossel menos visto da semana (184 em 1 dia) já se aproxima do melhor post de antes (211).</p>`});
+
+/* ---- 03 Diagnóstico ---- */
+add({id:'pontos-fortes',folder:'03 Diagnóstico',title:'O que está funcionando',tags:['diagnóstico'],props:{},body:()=>`
+<ol>
+<li><strong>Alcance novo:</strong> +146% de pessoas alcançadas (${L('alcance','alcance')}).</li>
+<li><strong>Formato certo:</strong> Reels de viagem real (${L('reels-viagem','Reels')}).</li>
+<li><strong>Autoridade:</strong> carrosséis com 8–14% de interação (${L('carrosseis','carrosséis')}).</li>
+<li><strong>Ritmo de seguidores</strong> dobrou (${L('seguidores','seguidores')}).</li>
+<li><strong>Visitas ao perfil</strong> +32% por dia (${L('atividade-perfil','visitas')}).</li>
+</ol>`});
+
+add({id:'pontos-atencao',folder:'03 Diagnóstico',title:'Pontos de atenção',tags:['diagnóstico','correção'],props:{Urgente:'Link e endereço em zero'},body:()=>`
+<ol>
+<li><strong>Link da bio e endereço em 0:</strong> o alcance não está virando visita ao posto (${L('atividade-perfil','ver')}).</li>
+<li><strong>Dependência de um Reel:</strong> as visualizações caíram de 3,1 mil (08/11) para ~100 (12/11) (${L('constancia','constância')}).</li>
+<li><strong>Stories caíram:</strong> 8 interações na semana contra 86 antes (${L('interacoes','interações')}).</li>
+<li><strong>Chamadas para comentar não funcionaram:</strong> o carrossel do R$ 9.900 teve 0 comentários (${L('carrosseis','carrosséis')}).</li>
+<li><strong>Dados de público bloqueados</strong> até 100 seguidores (${L('publico','público')}).</li>
+</ol>`});
+
+add({id:'constancia',folder:'03 Diagnóstico',title:'Constância de publicação',tags:['frequência'],props:{Meta:'3 Reels + 1 carrossel por semana + stories todos os dias'},body:()=>`
+<p>A curva da semana mostra um pico e depois uma queda. Para o alcance se manter acima de 3 mil pessoas por semana, o perfil precisa de <strong>um Reel novo a cada 2 ou 3 dias</strong>, alternando viagem real, tutorial de recarga e entrevista com cliente (a série "De onde você veio?").</p>`});
+
+add({id:'leitura-honesta',folder:'03 Diagnóstico',title:'O que ainda não dá para afirmar',tags:['transparência'],props:{},body:()=>`
+<ul>
+<li><strong>Base pequena:</strong> com 92 seguidores, qualquer ganho vira percentual alto. O que conta é a <strong>tendência</strong>, e alcance, seguidores e interação subiram juntos.</li>
+<li><strong>Correlação, não prova:</strong> o crescimento coincide com o início do trabalho e com os formatos aplicados, mas fatores externos (como compartilhamentos espontâneos) também podem ter ajudado.</li>
+<li><strong>Uma semana é pouco:</strong> o próximo relatório (semana 4) vai mostrar se o ritmo se sustenta.</li>
+</ul>`});
+
+/* ---- 04 Próximos passos ---- */
+add({id:'proximos-passos',folder:'04 Próximos passos',title:'Metas e próximos passos',tags:['plano','metas'],props:{Prazo:'Semanas 2 a 4 (até 06/12)'},body:()=>`
+<div class="tbl"><table><thead><tr><th>Ação</th><th>Meta</th><th>Responsável</th></tr></thead><tbody>
+<tr><td>Link do WhatsApp/Maps na bio + endereço ativo</td><td>Sair de 0; 20+ toques por semana</td><td>HI Energy + RIZEI</td></tr>
+<tr><td>Passar de 100 seguidores</td><td>Até 20/11</td><td>RIZEI</td></tr>
+<tr><td>3 Reels por semana (viagem, tutorial, cliente)</td><td>Alcance semanal acima de 3 mil</td><td>RIZEI</td></tr>
+<tr><td>Stories todos os dias</td><td>Voltar a 50+ visualizações por dia</td><td>HI Energy (bastidor) + RIZEI</td></tr>
+<tr><td>Carrosséis com palavra-chave para comentar</td><td>Primeiros comentários</td><td>RIZEI</td></tr>
+<tr><td>Série "De onde você veio?" com clientes reais</td><td>1 episódio por semana</td><td>HI Energy (autorização) + RIZEI</td></tr>
+</tbody></table></div>
+<p>${L('impulsionamento','Impulsionamento')} para chegar à meta de 300 seguidores.</p>`});
+
+add({id:'impulsionamento',folder:'04 Próximos passos',title:'Impulsionamento local',tags:['anúncio'],props:{Investimento:'R$ 10–20 por dia',Público:'Ribeirão, Franca, Uberaba, Araxá · 30–50 anos · interesse em carro elétrico/BYD'},body:()=>`
+<p>No ritmo atual (~2,4 seguidores por dia), o perfil chega a <strong>~150 seguidores</strong> em 30 dias de trabalho. Para chegar a <strong>300</strong>, a recomendação é impulsionar os dois melhores Reels de viagem para as cidades de maior frota elétrica do corredor (dados do cofre de pesquisa).</p>`});
+
+/* ---- 05 RIZEI ---- */
+add({id:'sobre-rizei',folder:'05 RIZEI',title:'O que a RIZEI fez nesta semana',tags:['rizei'],props:{Serviço:'Raio-X RIZEI · inteligência de mercado + gestão de conteúdo'},body:()=>`
+<ol>
+<li><strong>Pesquisa de referências:</strong> 30 perfis de carro elétrico (Instagram, YouTube e TikTok).</li>
+<li><strong>Estudo do território:</strong> raio de recarga, frota elétrica por cidade (Senatran/Detran-SP) e perfil do comprador.</li>
+<li><strong>Plano de conteúdo:</strong> 5 pilares, 10 roteiros de Reels e 9 carrosséis.</li>
+<li><strong>Produção e publicação</strong>, com os resultados deste relatório.</li>
+</ol>
+<p>Ver ${L('metodo','o método')}.</p>`});
+
+add({id:'metodo',folder:'05 RIZEI',title:'Método RIZEI',tags:['rizei','método'],props:{},body:()=>`
+<p><strong>Dados → território → consumidor → conteúdo → medição.</strong> Primeiro a RIZEI descobre quem é o cliente e de onde ele vem. Depois produz o conteúdo que esse cliente consome e mede toda semana o que funcionou, para repetir o que dá resultado. Os dois Reels mais vistos da semana (${L('reels-viagem','viagem real')}) seguiram exatamente o formato que a pesquisa indicou.</p>`});
+
+add({id:'fontes',folder:'05 RIZEI',title:'Fonte dos dados',tags:['fontes'],props:{},body:()=>`
+<ul>
+<li>Painel profissional do Instagram de @hienergy.rifaina: abas Desempenho, Conteúdo e Público, filtros de 7 e 30 dias. Capturas de 13/11/2026.</li>
+<li>Os percentuais "+X%" são do Instagram. Os valores do período anterior e os ritmos por dia foram calculados pela RIZEI.</li>
+<li>As curvas diárias foram lidas dos gráficos do Instagram e são aproximadas.</li>
+</ul>`});
+
+const KEYS={
+ 'inicio':'Alcance +146% · seguidores +24,3% · interações 3,4x por dia em 7 dias.',
+ 'grafo':'Mapa de todas as notas do relatório.',
+ 'seguidores':'50 → 92 em 30 dias (+84%). 75 → 92 nos 7 dias da RIZEI (+24,3%).',
+ 'alcance':'6.125 visualizações (+32%) · 3.684 pessoas (+146%) · 90% vindo de Reels.',
+ 'interacoes':'249 interações em 7 dias = metade do mês. Reels: 201 de 204.',
+ 'atividade-perfil':'81 visitas (+32% por dia). Link e endereço: 0 toques.',
+ 'publico':'Dados liberados a partir de 100 seguidores. Faltam 8.',
+ 'ranking':'Top: Reel da câmera (3 mil) e Brasília → Rifaina (1,9 mil).',
+ 'reels-viagem':'Viagem real = formato que a pesquisa indicou. 3 mil e 1,9 mil visualizações.',
+ 'carrosseis':'Interação de 8–14%, muitos reposts e envios. R$ 9.900: 0 comentários.',
+ 'antes-depois':'Antes: 39–211 visualizações. Depois: Reels de 1,9 mil e 3 mil.',
+ 'pontos-fortes':'Alcance novo, formato certo, autoridade, ritmo de seguidores e visitas.',
+ 'pontos-atencao':'Link/endereço em 0 · dependência de 1 Reel · stories em queda · CTA sem comentários.',
+ 'constancia':'Meta: 3 Reels + 1 carrossel por semana + stories todos os dias.',
+ 'leitura-honesta':'Base pequena, uma semana só. O que conta é a tendência.',
+ 'proximos-passos':'6 ações para as semanas 2 a 4. Urgente: link e endereço.',
+ 'impulsionamento':'R$ 10–20 por dia nos 2 melhores Reels → meta de 300 seguidores.',
+ 'sobre-rizei':'Pesquisa, território, plano de conteúdo e produção.',
+ 'metodo':'Dados → território → consumidor → conteúdo → medição.',
+ 'fontes':'Painel do Instagram, capturas de 13/11/2026.'
+};
+
+/* ============ MOTOR DO COFRE ============ */
+const FOLDERS=['00 Painel','01 Resultados','02 Conteúdo','03 Diagnóstico','04 Próximos passos','05 RIZEI'];
+const FCOLOR={'00 Painel':'#E8F1EC','01 Resultados':'#A9CF4A','02 Conteúdo':'#7FB2E5','03 Diagnóstico':'#E3A44A','04 Próximos passos':'#C7A4F0','05 RIZEI':'#FF8A3D'};
+const byId=Object.fromEntries(NOTES.map(n=>[n.id,n]));
+const render=s=>s.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,(m,id,t)=>byId[id]?`<a class="wl" href="#${id}" data-id="${id}">${t}</a>`:t);
+// links
+NOTES.forEach(n=>{n.html=render(n.body());n.out=[...new Set([...n.html.matchAll(/data-id="([^"]+)"/g)].map(m=>m[1]).filter(i=>i!==n.id))];});
+NOTES.forEach(n=>n.back=NOTES.filter(o=>o.out.includes(n.id)).map(o=>o.id));
+const EDGES=[];NOTES.forEach(n=>n.out.forEach(t=>{if(!EDGES.some(e=>(e[0]===t&&e[1]===n.id)))EDGES.push([n.id,t])}));
+
+const $=s=>document.querySelector(s);
+let open=['inicio'],cur='inicio',filter='';
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let closed=new Set(store.get('rz-closed',[]));
+
+function tree(){
+  const q=filter.trim().toLowerCase();
+  const hit=n=>!q||(n.title+' '+n.tags.join(' ')+' '+n.html.replace(/<[^>]+>/g,' ')).toLowerCase().includes(q);
+  let cnt=0;
+  $('#tree').innerHTML=FOLDERS.map(f=>{
+    const fs=NOTES.filter(n=>n.folder===f&&hit(n));cnt+=fs.length;
+    if(q&&!fs.length)return '';
+    const isClosed=!q&&closed.has(f);
+    return `<div class="folder ${isClosed?'closed':''}" data-f="${f}"><button aria-expanded="${!isClosed}"><span class="chev">▾</span>${f.slice(3)} <span style="margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)">${fs.length}</span></button><div class="files">${fs.map(n=>{let t=n.title;if(q){const i=t.toLowerCase().indexOf(q);if(i>=0)t=t.slice(0,i)+'<mark>'+t.slice(i,i+q.length)+'</mark>'+t.slice(i+q.length)}return `<button class="file ${n.id===cur?'active':''}" data-id="${n.id}">${t}</button>`}).join('')}</div></div>`}).join('');
+  $('#count').textContent=`${cnt} de ${NOTES.length} notas · ${EDGES.length} links`;
+}
+function tabs(){
+  $('#tabs').innerHTML=open.map(id=>`<div class="tab ${id===cur?'active':''}" role="tab" aria-selected="${id===cur}" data-id="${id}"><span>${byId[id].title}</span>${open.length>1?`<button class="x" data-close="${id}" aria-label="Fechar aba">×</button>`:''}</div>`).join('');
+}
+function go(id,push=true){
+  if(!byId[id])id='inicio';
+  cur=id;if(!open.includes(id)){open.push(id);if(open.length>6)open.shift();}
+  const n=byId[id];
+  const props=Object.entries(n.props||{});
+  $('#note').innerHTML=`<div class="crumb">${n.folder.slice(3)} <span>/</span> <b>${n.title}</b></div><h1>${n.title}</h1>
+  <div>${n.tags.map(t=>`<span class="tag" data-tag="${t}">#${t.replace(/\s/g,'-')}</span>`).join('')}</div>
+  ${props.length?`<dl class="props">${props.map(([k,v])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`:''}
+  ${n.html}
+  <div class="right-inline"><h3>Links desta nota</h3><p>${n.out.map(i=>`<a class="wl" href="#${i}" data-id="${i}">${byId[i].title}</a>`).join(' · ')||'—'}</p><h3>Citada em</h3><p>${n.back.map(i=>`<a class="wl" href="#${i}" data-id="${i}">${byId[i].title}</a>`).join(' · ')||'—'}</p></div><div class="sig">${RZ}<span><b>RIZEI</b> · inteligência de mercado e conteúdo · relatório preparado para HI Energy</span></div>`;
+  $('#mtitle').textContent=n.title;
+  $('#scroll').scrollTop=0;
+  [...$('#note').querySelectorAll('h2')].forEach((h,i)=>h.id='s'+i);
+  $('#outline').innerHTML=[...$('#note').querySelectorAll('h2')].map(h=>`<a href="#${cur}" data-sec="${h.id}">${h.textContent}</a>`).join('')||'<div class="empty">Sem seções</div>';
+  $('#out').innerHTML=n.out.map(i=>`<button data-id="${i}">${byId[i].title}</button>`).join('')||'<div class="empty">Nenhum</div>';
+  $('#back').innerHTML=n.back.map(i=>`<button data-id="${i}">${byId[i].title}</button>`).join('')||'<div class="empty">Nenhum</div>';
+  document.querySelectorAll('.rbtn').forEach(b=>b.setAttribute('aria-pressed',b.dataset.go===id));
+  tree();tabs();
+  if(push&&location.hash!=='#'+id){try{history.replaceState(null,'','#'+id)}catch(e){location.hash=id}}
+  if(id==='grafo')bigGraph();
+  localGraph();
+  $('#app').classList.remove('drawer');hideTip();
+}
+document.addEventListener('click',e=>{
+  const sec=e.target.closest('[data-sec]');if(sec){e.preventDefault();document.getElementById(sec.dataset.sec)?.scrollIntoView({behavior:'smooth'});return}
+  const cl=e.target.closest('[data-close]');if(cl){e.stopPropagation();open=open.filter(i=>i!==cl.dataset.close);if(cur===cl.dataset.close)go(open[open.length-1]);else tabs();return}
+  const t=e.target.closest('[data-id]');if(t){e.preventDefault();go(t.dataset.id);return}
+  const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return}
+  const f=e.target.closest('.folder>button');if(f){const k=f.parentElement.dataset.f;closed.has(k)?closed.delete(k):closed.add(k);store.set('rz-closed',[...closed]);tree();return}
+  const tg=e.target.closest('[data-tag]');if(tg){filter=tg.dataset.tag;$('#q').value=filter;tree();$('#app').classList.add('drawer');return}
+});
+$('#q').addEventListener('input',e=>{filter=e.target.value;tree()});
+$('#menu').addEventListener('click',()=>$('#app').classList.add('drawer'));
+$('#scrim').addEventListener('click',()=>$('#app').classList.remove('drawer'));
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(h&&h!==cur)go(h,false)});
+
+/* ---- dica ao passar o mouse ---- */
+function tipHTML(id){
+  const n=byId[id];if(!n)return '';
+  const foot=`<div class="th">${n.out.length} links · citada em ${n.back.length} · clique para abrir</div>`;
+  const pr=Object.entries(n.props||{}).slice(0,3);
+  return `<div class="tt">${n.title}</div><div class="tf" style="color:${FCOLOR[n.folder]}">${n.folder.slice(3)}</div>${pr.length?`<div class="tg">${pr.map(([k,v])=>`<span>${k}</span><b style="text-align:left;font-weight:500">${v}</b>`).join('')}</div>`:''}${KEYS[id]?`<div class="tk">${KEYS[id]}</div>`:''}${foot}`;
+}
+const TIP=$('#tip');
+function showTip(id,x,y){const h=tipHTML(id);if(!h){hideTip();return}TIP.innerHTML=h;TIP.classList.add('on');const w=TIP.offsetWidth,hh=TIP.offsetHeight;let L=x+16,T=y+16;if(L+w>innerWidth-8)L=x-w-16;if(T+hh>innerHeight-8)T=y-hh-16;TIP.style.left=Math.max(8,L)+'px';TIP.style.top=Math.max(8,T)+'px'}
+function hideTip(){TIP.classList.remove('on')}
+document.getElementById('scroll').addEventListener('scroll',hideTip);
+
+document.addEventListener('pointermove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(t&&e.pointerType!=='touch'){TIP.innerHTML=t.dataset.tip;TIP.classList.add('on');const w=TIP.offsetWidth,hh=TIP.offsetHeight;let L=e.clientX+16,T=e.clientY+16;if(L+w>innerWidth-8)L=e.clientX-w-16;if(T+hh>innerHeight-8)T=e.clientY-hh-16;TIP.style.left=Math.max(8,L)+'px';TIP.style.top=Math.max(8,T)+'px'}else if(!(e.target.closest&&e.target.closest('canvas'))&&!(e.target.closest&&e.target.closest('[data-tip]')))hideTip()});
+
+/* ---- grafos (força simples em canvas) ---- */
+function sim(nodes,edges,w,h,iters){
+  nodes.forEach((n,i)=>{if(n.x==null){const a=i*2.399;const rr=Math.sqrt(i+1)*22;n.x=w/2+Math.cos(a)*rr;n.y=h/2+Math.sin(a)*rr}n.vx=0;n.vy=0});
+  const idx=Object.fromEntries(nodes.map((n,i)=>[n.id,i]));const L0=Math.min(w,h)/7;
+  for(let k=0;k<iters;k++){
+    const cool=1-k/iters;
+    for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=nodes[i],b=nodes[j];let dx=a.x-b.x,dy=a.y-b.y;const d=Math.sqrt(dx*dx+dy*dy)+0.5;const f=L0*L0/d/d*0.6;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f}
+    edges.forEach(([s,t])=>{const a=nodes[idx[s]],b=nodes[idx[t]];if(!a||!b)return;const dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)+0.5,f=(d-L0)*0.03;a.vx+=dx/d*f;a.vy+=dy/d*f;b.vx-=dx/d*f;b.vy-=dy/d*f});
+    nodes.forEach(n=>{if(n.fixed){n.vx=n.vy=0;return}n.vx+=(w/2-n.x)*0.01;n.vy+=(h/2-n.y)*0.01;const v=Math.hypot(n.vx,n.vy),m=8*cool+0.5;if(v>m){n.vx*=m/v;n.vy*=m/v}n.x+=n.vx;n.y+=n.vy;n.vx*=0.5;n.vy*=0.5;n.x=Math.max(20,Math.min(w-20,n.x));n.y=Math.max(16,Math.min(h-22,n.y))});
+  }
+}
+function paint(cv,nodes,edges,opt){
+  const r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;cv.width=r.width*dpr;cv.height=r.height*dpr;
+  const ctx=cv.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,r.width,r.height);
+  const idx=Object.fromEntries(nodes.map(n=>[n.id,n]));const hv=opt.hover;
+  const near=new Set();if(hv){near.add(hv);edges.forEach(([s,t])=>{if(s===hv)near.add(t);if(t===hv)near.add(s)})}
+  edges.forEach(([s,t])=>{const a=idx[s],b=idx[t];if(!a||!b)return;const on=hv&&(s===hv||t===hv);ctx.strokeStyle=on?'rgba(169,207,74,.8)':'rgba(138,151,171,'+(hv?.08:.22)+')';ctx.lineWidth=on?1.6:1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke()});
+  nodes.forEach(n=>{const deg=byId[n.id].out.length+byId[n.id].back.length;const rad=n.id===cur?8:3+Math.min(6,Math.sqrt(deg)*1.2);const dim=hv&&!near.has(n.id);
+    ctx.globalAlpha=dim?.25:1;ctx.fillStyle=n.id===cur?'#FF8A3D':FCOLOR[byId[n.id].folder];ctx.beginPath();ctx.arc(n.x,n.y,rad,0,7);ctx.fill();
+    if((opt.labels&&(!opt.hubOnly||deg>=opt.hubOnly))||n.id===cur||near.has(n.id)){ctx.fillStyle=dim?'#5B6880':'#B7C3CE';ctx.font='11px Inter, Arial';ctx.textAlign='center';ctx.fillText(byId[n.id].title.replace(/ \((SP|MG)\)$/,'').slice(0,26),n.x,n.y+rad+12)}
+    ctx.globalAlpha=1;n.rad=rad});
+}
+function interactive(cv,nodes,edges,opt){
+  let drag=null,moved=false;const pos=e=>{const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return [p.clientX-r.left,p.clientY-r.top]};
+  const at=([x,y])=>nodes.find(n=>(n.x-x)**2+(n.y-y)**2<Math.max(64,(n.rad+4)**2));
+  cv.onpointermove=e=>{const p=pos(e);if(drag){drag.x=p[0];drag.y=p[1];moved=true;hideTip();paint(cv,nodes,edges,opt);return}const n=at(p);const nid=n?n.id:null;if(nid!==opt.hover){opt.hover=nid;paint(cv,nodes,edges,opt)}cv.style.cursor=n?'pointer':'default';if(n&&e.pointerType!=='touch')showTip(n.id,e.clientX,e.clientY);else hideTip()};
+  cv.onpointerdown=e=>{const n=at(pos(e));if(n){drag=n;moved=false;cv.setPointerCapture(e.pointerId)}};
+  cv.onpointerup=e=>{if(drag&&!moved){hideTip();go(drag.id)}drag=null};
+  cv.onpointerleave=()=>{opt.hover=null;hideTip();paint(cv,nodes,edges,opt)};
+}
+let BIG=null;
+function bigGraph(){
+  const cv=$('#bg');if(!cv)return;const r=cv.getBoundingClientRect();
+  if(!BIG){BIG={nodes:NOTES.map(n=>({id:n.id})),opt:{labels:true,hubOnly:9}};sim(BIG.nodes,EDGES,r.width,r.height,400)}
+  paint(cv,BIG.nodes,EDGES,BIG.opt);interactive(cv,BIG.nodes,EDGES,BIG.opt);
+  $('#glegend').innerHTML=FOLDERS.map(f=>`<span><i style="background:${FCOLOR[f]}"></i>${f.slice(3)}</span>`).join('');
+}
+function localGraph(){
+  const cv=$('#lg');if(!cv||!cv.offsetParent)return;const r=cv.getBoundingClientRect();
+  const n=byId[cur];const ids=[cur,...new Set([...n.out,...n.back])];
+  const nodes=ids.map(id=>({id}));nodes[0].x=r.width/2;nodes[0].y=r.height/2;nodes[0].fixed=true;
+  const ed=EDGES.filter(([s,t])=>ids.includes(s)&&ids.includes(t));
+  const k=nodes.length-1;nodes.slice(1).forEach((nd,i)=>{const a=-Math.PI/2+i*2*Math.PI/Math.max(k,1);const rr=Math.min(r.width,r.height)*0.36;nd.x=r.width/2+Math.cos(a)*rr;nd.y=r.height/2+Math.sin(a)*rr*0.9});const opt={labels:k<=8};
+  paint(cv,nodes,ed,opt);interactive(cv,nodes,ed,opt);$('#lcount').textContent=ids.length-1+' links';
+}
+window.addEventListener('resize',()=>{localGraph();if(cur==='grafo'&&BIG)paint($('#bg'),BIG.nodes,EDGES,BIG.opt)});
+
+go((location.hash||'#inicio').slice(1),false);
+</script>
